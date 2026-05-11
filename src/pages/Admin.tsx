@@ -11,13 +11,14 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; }
 interface Rec { id: string; business_name: string; category: string; description: string; website_url: string | null; logo_url: string | null; is_coming_soon: boolean; }
 interface SoldProject { id: string; project_name: string; category: string; client_name: string; client_contact: string | null; domain: string | null; price_cop: number; sold_at: string; notes: string | null; status: string; }
 interface Brand { id: string; name: string; logo_url: string; website_url: string | null; sort_order: number; is_active: boolean; }
+interface HeroSlide { id: string; title: string; subtitle: string | null; image_url: string; cta_label: string | null; cta_link: string | null; sort_order: number; is_active: boolean; }
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -37,13 +38,15 @@ export default function Admin() {
       <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Panel <span className="text-gradient">Admin</span></h1>
       <p className="text-muted-foreground mb-8">Gestiona productos, directorio, proyectos vendidos y marcas aliadas.</p>
 
-      <Tabs defaultValue="sold">
+      <Tabs defaultValue="hero">
         <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
           <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Proyectos vendidos</TabsTrigger>
           <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas (carrusel)</TabsTrigger>
           <TabsTrigger value="products"><Package className="h-4 w-4 mr-2" />Productos</TabsTrigger>
           <TabsTrigger value="directory"><Building2 className="h-4 w-4 mr-2" />Directorio</TabsTrigger>
         </TabsList>
+        <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
         <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
         <TabsContent value="products" className="mt-6"><ProductsAdmin /></TabsContent>
@@ -416,6 +419,100 @@ function DirectoryAdmin() {
           </div>
         ))}
         {items.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin entradas aún.</p>}
+      </div>
+    </>
+  );
+}
+
+/* ======================= CARRUSEL HERO PRINCIPAL ======================= */
+function HeroSlidesAdmin() {
+  const [items, setItems] = useState<HeroSlide[]>([]);
+  const [editing, setEditing] = useState<HeroSlide | null>(null);
+  const [open, setOpen] = useState(false);
+  const [imgPreview, setImgPreview] = useState<string>("");
+
+  const load = async () => {
+    const { data } = await supabase.from("hero_slides").select("*").order("sort_order", { ascending: true });
+    setItems((data ?? []) as HeroSlide[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      title: String(fd.get("title")),
+      subtitle: String(fd.get("subtitle") ?? "") || null,
+      image_url: String(fd.get("image_url")),
+      cta_label: String(fd.get("cta_label") ?? "") || null,
+      cta_link: String(fd.get("cta_link") ?? "") || null,
+      sort_order: Number(fd.get("sort_order") ?? 0),
+      is_active: fd.get("is_active") === "on",
+    };
+    const { error } = editing
+      ? await supabase.from("hero_slides").update(payload).eq("id", editing.id)
+      : await supabase.from("hero_slides").insert(payload);
+    if (error) toast.error(error.message);
+    else { toast.success("Guardado"); setOpen(false); setEditing(null); setImgPreview(""); load(); }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("¿Eliminar slide?")) return;
+    const { error } = await supabase.from("hero_slides").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Eliminado"); load(); }
+  };
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <p className="text-sm text-muted-foreground">Slides del carrusel grande de la página principal. Cambia imágenes, títulos y enlaces.</p>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setEditing(null); setImgPreview(""); } }}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo slide</Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} slide</DialogTitle></DialogHeader>
+            <form onSubmit={save} className="space-y-3">
+              <div><Label>Título</Label><Input name="title" defaultValue={editing?.title} required /></div>
+              <div><Label>Subtítulo / descripción</Label><Textarea name="subtitle" defaultValue={editing?.subtitle ?? ""} rows={2} /></div>
+              <div>
+                <Label>URL de imagen (galería)</Label>
+                <Input name="image_url" defaultValue={editing?.image_url}
+                  onChange={(e) => setImgPreview(e.target.value)} placeholder="https://..." required />
+                <p className="text-xs text-muted-foreground mt-1">Sube tu imagen a imgur, ibb.co o tu CDN y pega la URL.</p>
+                {(imgPreview || editing?.image_url) && (
+                  <img src={imgPreview || editing?.image_url} alt="preview"
+                    className="mt-2 rounded-lg border border-border max-h-40 object-cover w-full" />
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Texto del botón</Label><Input name="cta_label" defaultValue={editing?.cta_label ?? ""} placeholder="Ver más" /></div>
+                <div><Label>Enlace del botón</Label><Input name="cta_link" defaultValue={editing?.cta_link ?? ""} placeholder="/servicios-web" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Orden</Label><Input type="number" name="sort_order" defaultValue={editing?.sort_order ?? 0} /></div>
+                <div className="flex items-center justify-between mt-6"><Label>Activo</Label><Switch name="is_active" defaultChecked={editing?.is_active ?? true} /></div>
+              </div>
+              <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {items.map((s) => (
+          <div key={s.id} className="rounded-xl border border-border bg-card overflow-hidden">
+            <img src={s.image_url} alt={s.title} className="w-full h-32 object-cover" />
+            <div className="p-4">
+              <div className="font-semibold">{s.title} <span className="text-xs text-muted-foreground">#{s.sort_order} {s.is_active ? "" : "· oculto"}</span></div>
+              <div className="text-xs text-muted-foreground line-clamp-2 mb-3">{s.subtitle}</div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => { setEditing(s); setImgPreview(s.image_url); setOpen(true); }}><Edit className="h-3.5 w-3.5 mr-1" />Editar</Button>
+                <Button size="sm" variant="outline" onClick={() => remove(s.id)}><Trash2 className="h-3.5 w-3.5 mr-1" />Borrar</Button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-muted-foreground text-sm text-center py-8 col-span-full">Sin slides aún. Se mostrarán los predeterminados en el inicio.</p>}
       </div>
     </>
   );

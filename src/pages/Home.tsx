@@ -1,60 +1,31 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Zap, Globe, Printer, ShoppingBag, Check } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Globe, Printer, ShoppingBag, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 import printingImg from "@/assets/printing.jpg";
 import techImg from "@/assets/tech-products.jpg";
 import { BrandsMarquee } from "@/components/BrandsMarquee";
+import { HeroCarousel } from "@/components/HeroCarousel";
+import { TiendaSection } from "@/pages/Tienda";
+import { DirectorioSection } from "@/pages/Directorio";
+import { waLink, INSTAGRAM_URL } from "@/lib/contact";
 
 const sectionPreviews = [
-  {
-    to: "/servicios-web",
-    icon: Globe,
-    title: "Servicios Web",
-    desc: "Landing pages, e-commerce, POS, sistemas de citas y más.",
-    bullets: ["Diseño premium", "SEO optimizado", "Hosting incluido"],
-    bg: heroBg,
-  },
-  {
-    to: "/impresiones",
-    icon: Printer,
-    title: "Impresiones & Uniformes",
-    desc: "Tarjetas, volantes, pendones, uniformes corporativos y avisos LED.",
-    bullets: ["Calidad premium", "Entrega rápida", "Diseño incluido"],
-    bg: printingImg,
-  },
-  {
-    to: "/tienda",
-    icon: ShoppingBag,
-    title: "Tienda Tech",
-    desc: "Teclados, mouses, cámaras de seguridad y accesorios.",
-    bullets: ["Marcas reconocidas", "Garantía", "Envío nacional"],
-    bg: techImg,
-  },
-  {
-    to: "/directorio",
-    icon: Zap,
-    title: "Directorio de Aliados",
-    desc: "Negocios verificados que confían en TuuWeb.",
-    bullets: ["Restaurantes", "Salud", "Servicios"],
-    bg: heroBg,
-  },
+  { to: "/servicios-web", icon: Globe, title: "Servicios Web", desc: "Landing, e-commerce, POS y sistemas a medida.", bullets: ["Diseño premium", "SEO optimizado", "Hosting incluido"], bg: heroBg },
+  { to: "/impresiones", icon: Printer, title: "Impresiones & Avisos LED", desc: "Tarjetas, uniformes, vinilos y avisos luminosos.", bullets: ["Calidad premium", "Entrega rápida", "Diseño incluido"], bg: printingImg },
+  { to: "/tienda", icon: ShoppingBag, title: "Tienda TuuWeb", desc: "Anuncios, electrónicos y accesorios al mejor precio.", bullets: ["Marcas reconocidas", "Garantía", "Envío nacional"], bg: techImg },
+  { to: "/directorio", icon: Zap, title: "Negocios de Confianza", desc: "Empresas verificadas y recomendadas por categoría.", bullets: ["Restaurantes", "Salud", "Servicios"], bg: heroBg },
 ];
 
 export default function Home() {
   return (
     <>
-      {/* HERO */}
+      {/* HERO INTRO */}
       <section className="relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-50"
-          style={{ backgroundImage: `url(${heroBg})`, backgroundSize: "cover", backgroundPosition: "center" }}
-        />
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="absolute inset-0 bg-gradient-glow" />
-
-        <div className="relative container mx-auto px-4 pt-20 pb-28 text-center">
+        <div className="relative container mx-auto px-4 pt-16 pb-10 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-2 glass border border-primary/20 rounded-full px-4 py-1.5 text-sm mb-6"
@@ -77,38 +48,32 @@ export default function Home() {
           >
             Desde tu página web hasta tus uniformes, todo en un solo lugar y a precio de emprendedor.
           </motion.p>
+        </div>
+      </section>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
-          >
-            <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-elegant text-base h-12 px-8">
-              <Link to="/servicios-web">Ver Servicios Web <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="h-12 px-8">
-              <Link to="/impresiones">Cotizar Impresión</Link>
-            </Button>
-          </motion.div>
+      {/* CARRUSEL DE OFERTAS PRINCIPALES (admin editable) */}
+      <HeroCarousel />
 
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {[
-              { icon: Globe, label: "Páginas Web", to: "/servicios-web" },
-              { icon: Printer, label: "Impresiones", to: "/impresiones" },
-              { icon: ShoppingBag, label: "Tienda Tech", to: "/tienda" },
-              { icon: Zap, label: "Directorio", to: "/directorio" },
-            ].map((f, i) => (
-              <motion.div
-                key={f.label}
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + i * 0.08 }}
-              >
-                <Link to={f.to} className="block glass border border-border rounded-2xl p-5 hover-lift">
-                  <f.icon className="h-7 w-7 text-primary mb-2 mx-auto" />
-                  <div className="text-sm font-semibold">{f.label}</div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+      {/* QUICK NAV */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {[
+            { icon: Globe, label: "Páginas Web", to: "/servicios-web" },
+            { icon: Printer, label: "Impresiones", to: "/impresiones" },
+            { icon: ShoppingBag, label: "Tienda", to: "/tienda" },
+            { icon: Zap, label: "Negocios", to: "/directorio" },
+          ].map((f, i) => (
+            <motion.div
+              key={f.label}
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+            >
+              <Link to={f.to} className="block glass border border-border rounded-2xl p-5 text-center hover-lift">
+                <f.icon className="h-7 w-7 text-primary mb-2 mx-auto" />
+                <div className="text-sm font-semibold">{f.label}</div>
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </section>
 
@@ -157,6 +122,36 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TIENDA EMBED */}
+      <section className="container mx-auto px-4 pb-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tienda</p>
+            <h2 className="font-display text-3xl md:text-4xl font-bold mt-1">Anuncios, electrónicos <span className="text-gradient">y más</span></h2>
+            <p className="text-muted-foreground mt-2 max-w-xl">Filtra por precio o busca lo que necesitas. Próximamente con stock en vivo.</p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/tienda">Ver tienda completa <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+        </div>
+        <TiendaSection embedded limit={4} />
+      </section>
+
+      {/* DIRECTORIO EMBED */}
+      <section className="container mx-auto px-4 pb-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Directorio</p>
+            <h2 className="font-display text-3xl md:text-4xl font-bold mt-1">Negocios de Confianza <span className="text-gradient">por Categoría</span></h2>
+            <p className="text-muted-foreground mt-2 max-w-xl">Empresas verificadas y recomendadas por TuuWeb.</p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/directorio">Ver todos <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+        </div>
+        <DirectorioSection limit={6} />
+      </section>
+
       {/* WHY */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center max-w-2xl mx-auto mb-10">
@@ -184,9 +179,18 @@ export default function Home() {
           <div className="relative">
             <h2 className="font-display text-3xl md:text-5xl font-bold text-primary-foreground">¿Listo para potenciar tu marca?</h2>
             <p className="mt-3 text-primary-foreground/90 max-w-xl mx-auto">Hablemos por WhatsApp y empecemos hoy mismo.</p>
-            <Button asChild size="lg" variant="secondary" className="mt-6 h-12 px-8">
-              <a href="https://wa.me/573000000000" target="_blank" rel="noreferrer">Escríbenos por WhatsApp</a>
-            </Button>
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button asChild size="lg" variant="secondary" className="h-12 px-8">
+                <a href={waLink("Hola, quiero potenciar mi marca con TuuWeb")} target="_blank" rel="noreferrer">
+                  <MessageCircle className="h-4 w-4 mr-2" />Escríbenos por WhatsApp
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-12 px-8 bg-transparent border-white/30 text-primary-foreground hover:bg-white/10">
+                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
+                  Síguenos en Instagram
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

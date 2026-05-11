@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Sparkles } from "lucide-react";
+import { ShoppingCart, Sparkles, Search, ArrowDownAZ, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase, formatCOP, isSupabaseConfigured } from "@/lib/supabase";
 import techImg from "@/assets/tech-products.jpg";
+import { waLink } from "@/lib/contact";
 
 interface Product {
   id: string; name: string; description: string;
@@ -11,9 +13,13 @@ interface Product {
   is_active: boolean; is_coming_soon: boolean;
 }
 
-export default function Tienda() {
+type SortKey = "asc" | "desc" | "recent";
+
+export function TiendaSection({ embedded = false, limit }: { embedded?: boolean; limit?: number }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState("");
+  const [sort, setSort] = useState<SortKey>("asc");
 
   useEffect(() => {
     if (!isSupabaseConfigured) { setLoading(false); return; }
@@ -27,68 +33,105 @@ export default function Tienda() {
     })();
   }, []);
 
+  const filtered = useMemo(() => {
+    const list = products.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
+    if (sort === "asc") list.sort((a, b) => a.price_cop - b.price_cop);
+    if (sort === "desc") list.sort((a, b) => b.price_cop - a.price_cop);
+    return limit ? list.slice(0, limit) : list;
+  }, [products, q, sort, limit]);
+
   const showOverlay = !loading && products.length === 0;
+  const skeletonCount = limit ?? 4;
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="text-center mb-12">
-        <h1 className="font-display text-4xl md:text-5xl font-bold">Tienda <span className="text-gradient">Tech & Seguridad</span></h1>
-        <p className="mt-4 text-lg text-muted-foreground">Teclados, mouses, cámaras y más a precios increíbles.</p>
-      </div>
-
-      <div className="relative">
-        <div className={showOverlay ? "blur-sm pointer-events-none select-none" : ""}>
-          {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="rounded-2xl bg-muted h-80 animate-pulse" />
-              ))}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
-                  <img src={techImg} alt="" className="w-full h-48 object-cover" />
-                  <div className="p-5">
-                    <div className="h-4 bg-muted rounded w-2/3 mb-2" />
-                    <div className="h-3 bg-muted rounded w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.map((p, i) => (
-                <motion.div key={p.id}
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                  className="rounded-2xl border border-border bg-card overflow-hidden hover-lift">
-                  <img src={p.images?.[0] ?? techImg} alt={p.name} className="w-full h-48 object-cover" />
-                  <div className="p-5">
-                    <h3 className="font-semibold mb-1">{p.name}</h3>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-gradient text-lg">{formatCOP(p.price_cop)}</span>
-                      <Button size="sm" className="bg-gradient-primary text-primary-foreground">
-                        <ShoppingCart className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+    <div className="relative">
+      <div className={showOverlay ? "blur-sm pointer-events-none select-none" : ""}>
+        <div className="flex flex-col md:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar producto, anuncio, electrónico..." className="pl-10 h-11" />
+          </div>
+          <div className="flex gap-2">
+            <Button variant={sort === "asc" ? "default" : "outline"} size="sm" onClick={() => setSort("asc")} className={sort === "asc" ? "bg-gradient-primary text-primary-foreground" : ""}>
+              <ArrowDownAZ className="h-4 w-4 mr-1" /> Menor precio
+            </Button>
+            <Button variant={sort === "desc" ? "default" : "outline"} size="sm" onClick={() => setSort("desc")} className={sort === "desc" ? "bg-gradient-primary text-primary-foreground" : ""}>
+              <Tag className="h-4 w-4 mr-1" /> Mayor precio
+            </Button>
+          </div>
         </div>
 
-        {showOverlay && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="glass border border-primary/30 rounded-3xl p-10 max-w-lg text-center shadow-elegant">
-              <Sparkles className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-              <h2 className="font-display text-3xl font-bold mb-3">PRÓXIMAMENTE</h2>
-              <p className="text-muted-foreground">Estamos preparando el mejor inventario para ti.</p>
-            </div>
+        {loading || showOverlay ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: skeletonCount }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
+                <img src={techImg} alt="" className="w-full h-48 object-cover" />
+                <div className="p-5 space-y-2">
+                  <div className="h-4 bg-muted rounded w-2/3" />
+                  <div className="h-3 bg-muted rounded w-1/2" />
+                  <div className="h-6 bg-muted rounded w-1/3 mt-3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filtered.map((p, i) => (
+              <motion.div key={p.id}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                className="rounded-2xl border border-border bg-card overflow-hidden hover-lift">
+                <img src={p.images?.[0] ?? techImg} alt={p.name} className="w-full h-48 object-cover" />
+                <div className="p-5">
+                  <h3 className="font-semibold mb-1">{p.name}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-gradient text-lg">{formatCOP(p.price_cop)}</span>
+                    <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
+                      <a href={waLink(`Hola, me interesa: ${p.name}`)} target="_blank" rel="noreferrer">
+                        <ShoppingCart className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+            {filtered.length === 0 && !showOverlay && (
+              <p className="col-span-full text-center text-muted-foreground py-8">Sin resultados.</p>
+            )}
           </div>
         )}
       </div>
+
+      {showOverlay && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="glass border border-primary/30 rounded-3xl p-8 md:p-10 max-w-lg text-center shadow-elegant pointer-events-auto">
+            <Sparkles className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+            <h2 className="font-display text-3xl font-bold mb-3">PRÓXIMAMENTE</h2>
+            <p className="text-muted-foreground">
+              Estamos preparando anuncios, artículos electrónicos y mucho más, todo al mejor precio.
+            </p>
+            {embedded && (
+              <Button asChild className="mt-5 bg-gradient-primary text-primary-foreground">
+                <a href={waLink("Hola, quiero saber cuándo abre la tienda")} target="_blank" rel="noreferrer">Avísame por WhatsApp</a>
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Tienda() {
+  return (
+    <div className="container mx-auto px-4 py-16">
+      <div className="text-center mb-10">
+        <h1 className="font-display text-4xl md:text-5xl font-bold">Tienda <span className="text-gradient">TuuWeb</span></h1>
+        <p className="mt-4 text-lg text-muted-foreground">
+          Anuncios, artículos electrónicos, accesorios y mucho más — al mejor precio.
+        </p>
+      </div>
+      <TiendaSection />
     </div>
   );
 }
