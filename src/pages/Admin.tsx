@@ -520,3 +520,73 @@ function HeroSlidesAdmin() {
     </>
   );
 }
+
+/* ======================= MENSAJES DE SOPORTE ======================= */
+function SupportMessagesAdmin() {
+  const [items, setItems] = useState<SupportMsg[]>([]);
+  const [filter, setFilter] = useState<string>("all");
+
+  const load = async () => {
+    const { data } = await supabase.from("support_messages").select("*").order("created_at", { ascending: false });
+    setItems((data ?? []) as SupportMsg[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const setStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("support_messages").update({ status }).eq("id", id);
+    if (error) toast.error(error.message); else load();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("¿Eliminar mensaje?")) return;
+    const { error } = await supabase.from("support_messages").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Eliminado"); load(); }
+  };
+
+  const filtered = filter === "all" ? items : items.filter((i) => i.status === filter);
+
+  return (
+    <>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {["all", "nuevo", "en_proceso", "respondido", "cerrado"].map((s) => (
+          <Button key={s} size="sm" variant={filter === s ? "default" : "outline"}
+            onClick={() => setFilter(s)} className={filter === s ? "bg-gradient-primary text-primary-foreground" : ""}>
+            {s === "all" ? `Todos (${items.length})` : s.replace("_", " ")}
+          </Button>
+        ))}
+      </div>
+      <div className="grid gap-3">
+        {filtered.map((m) => (
+          <div key={m.id} className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold">{m.name}</span>
+                  {m.topic && <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{m.topic}</span>}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-secondary">{m.status.replace("_", " ")}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-3">
+                  <a href={`mailto:${m.email}`} className="flex items-center gap-1 hover:text-primary"><Mail className="h-3 w-3" />{m.email}</a>
+                  {m.phone && <a href={`tel:${m.phone}`} className="flex items-center gap-1 hover:text-primary"><Phone className="h-3 w-3" />{m.phone}</a>}
+                </div>
+                <p className="text-sm mt-2 whitespace-pre-wrap">{m.message}</p>
+              </div>
+              <div className="flex flex-col gap-2 shrink-0">
+                <select value={m.status} onChange={(e) => setStatus(m.id, e.target.value)}
+                  className="h-8 rounded-md border border-input bg-background px-2 text-xs">
+                  <option value="nuevo">nuevo</option>
+                  <option value="en_proceso">en proceso</option>
+                  <option value="respondido">respondido</option>
+                  <option value="cerrado">cerrado</option>
+                </select>
+                <Button size="icon" variant="outline" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin mensajes.</p>}
+      </div>
+    </>
+  );
+}
