@@ -11,7 +11,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; }
@@ -19,6 +19,7 @@ interface Rec { id: string; business_name: string; category: string; description
 interface SoldProject { id: string; project_name: string; category: string; client_name: string; client_contact: string | null; domain: string | null; price_cop: number; sold_at: string; notes: string | null; status: string; }
 interface Brand { id: string; name: string; logo_url: string; website_url: string | null; sort_order: number; is_active: boolean; }
 interface HeroSlide { id: string; title: string; subtitle: string | null; image_url: string; cta_label: string | null; cta_link: string | null; sort_order: number; is_active: boolean; }
+interface SupportMsg { id: string; name: string; email: string; phone: string | null; topic: string | null; message: string; status: string; created_at: string; }
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -38,14 +39,16 @@ export default function Admin() {
       <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Panel <span className="text-gradient">Admin</span></h1>
       <p className="text-muted-foreground mb-8">Gestiona productos, directorio, proyectos vendidos y marcas aliadas.</p>
 
-      <Tabs defaultValue="hero">
+      <Tabs defaultValue="messages">
         <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
           <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Proyectos vendidos</TabsTrigger>
           <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas (carrusel)</TabsTrigger>
           <TabsTrigger value="products"><Package className="h-4 w-4 mr-2" />Productos</TabsTrigger>
           <TabsTrigger value="directory"><Building2 className="h-4 w-4 mr-2" />Directorio</TabsTrigger>
         </TabsList>
+        <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
         <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
