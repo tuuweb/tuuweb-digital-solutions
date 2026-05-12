@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { Moon, Sun, User as UserIcon, LogOut, Shield, Menu } from "lucide-react";
+import { Moon, Sun, User as UserIcon, LogOut, Shield, Menu, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,7 +51,7 @@ export function Header() {
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
-          {user && (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2 hidden sm:inline-flex">
@@ -73,6 +73,10 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            <Button asChild size="sm" className="hidden sm:inline-flex bg-gradient-primary text-primary-foreground gap-2">
+              <Link to="/auth"><LogIn className="h-4 w-4" />Iniciar sesión</Link>
+            </Button>
           )}
 
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobile(!mobile)} aria-label="Menú">
@@ -98,6 +102,12 @@ export function Header() {
                 {l.label}
               </NavLink>
             ))}
+            {!user && (
+              <Link to="/auth" onClick={() => setMobile(false)}
+                className="mt-2 px-3 py-2 rounded-lg text-sm font-semibold bg-gradient-primary text-primary-foreground text-center">
+                Iniciar sesión
+              </Link>
+            )}
           </nav>
         </div>
       )}

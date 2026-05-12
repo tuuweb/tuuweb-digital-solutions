@@ -75,11 +75,11 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
             ))}
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 scrollbar-hide">
             {filtered.map((p, i) => (
               <motion.div key={p.id}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className="rounded-2xl border border-border bg-card overflow-hidden hover-lift">
+                className="shrink-0 w-[78%] sm:w-auto snap-center rounded-2xl border border-border bg-card overflow-hidden hover-lift">
                 <img src={p.images?.[0] ?? techImg} alt={p.name} className="w-full h-48 object-cover" />
                 <div className="p-5">
                   <h3 className="font-semibold mb-1">{p.name}</h3>

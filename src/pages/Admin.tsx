@@ -11,7 +11,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; }
@@ -19,6 +19,7 @@ interface Rec { id: string; business_name: string; category: string; description
 interface SoldProject { id: string; project_name: string; category: string; client_name: string; client_contact: string | null; domain: string | null; price_cop: number; sold_at: string; notes: string | null; status: string; }
 interface Brand { id: string; name: string; logo_url: string; website_url: string | null; sort_order: number; is_active: boolean; }
 interface HeroSlide { id: string; title: string; subtitle: string | null; image_url: string; cta_label: string | null; cta_link: string | null; sort_order: number; is_active: boolean; }
+interface SupportMsg { id: string; name: string; email: string; phone: string | null; topic: string | null; message: string; status: string; created_at: string; }
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -38,14 +39,16 @@ export default function Admin() {
       <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Panel <span className="text-gradient">Admin</span></h1>
       <p className="text-muted-foreground mb-8">Gestiona productos, directorio, proyectos vendidos y marcas aliadas.</p>
 
-      <Tabs defaultValue="hero">
+      <Tabs defaultValue="messages">
         <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
           <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Proyectos vendidos</TabsTrigger>
           <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas (carrusel)</TabsTrigger>
           <TabsTrigger value="products"><Package className="h-4 w-4 mr-2" />Productos</TabsTrigger>
           <TabsTrigger value="directory"><Building2 className="h-4 w-4 mr-2" />Directorio</TabsTrigger>
         </TabsList>
+        <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
         <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
@@ -513,6 +516,76 @@ function HeroSlidesAdmin() {
           </div>
         ))}
         {items.length === 0 && <p className="text-muted-foreground text-sm text-center py-8 col-span-full">Sin slides aún. Se mostrarán los predeterminados en el inicio.</p>}
+      </div>
+    </>
+  );
+}
+
+/* ======================= MENSAJES DE SOPORTE ======================= */
+function SupportMessagesAdmin() {
+  const [items, setItems] = useState<SupportMsg[]>([]);
+  const [filter, setFilter] = useState<string>("all");
+
+  const load = async () => {
+    const { data } = await supabase.from("support_messages").select("*").order("created_at", { ascending: false });
+    setItems((data ?? []) as SupportMsg[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const setStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("support_messages").update({ status }).eq("id", id);
+    if (error) toast.error(error.message); else load();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("¿Eliminar mensaje?")) return;
+    const { error } = await supabase.from("support_messages").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Eliminado"); load(); }
+  };
+
+  const filtered = filter === "all" ? items : items.filter((i) => i.status === filter);
+
+  return (
+    <>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {["all", "nuevo", "en_proceso", "respondido", "cerrado"].map((s) => (
+          <Button key={s} size="sm" variant={filter === s ? "default" : "outline"}
+            onClick={() => setFilter(s)} className={filter === s ? "bg-gradient-primary text-primary-foreground" : ""}>
+            {s === "all" ? `Todos (${items.length})` : s.replace("_", " ")}
+          </Button>
+        ))}
+      </div>
+      <div className="grid gap-3">
+        {filtered.map((m) => (
+          <div key={m.id} className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold">{m.name}</span>
+                  {m.topic && <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{m.topic}</span>}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-secondary">{m.status.replace("_", " ")}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-3">
+                  <a href={`mailto:${m.email}`} className="flex items-center gap-1 hover:text-primary"><Mail className="h-3 w-3" />{m.email}</a>
+                  {m.phone && <a href={`tel:${m.phone}`} className="flex items-center gap-1 hover:text-primary"><Phone className="h-3 w-3" />{m.phone}</a>}
+                </div>
+                <p className="text-sm mt-2 whitespace-pre-wrap">{m.message}</p>
+              </div>
+              <div className="flex flex-col gap-2 shrink-0">
+                <select value={m.status} onChange={(e) => setStatus(m.id, e.target.value)}
+                  className="h-8 rounded-md border border-input bg-background px-2 text-xs">
+                  <option value="nuevo">nuevo</option>
+                  <option value="en_proceso">en proceso</option>
+                  <option value="respondido">respondido</option>
+                  <option value="cerrado">cerrado</option>
+                </select>
+                <Button size="icon" variant="outline" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin mensajes.</p>}
       </div>
     </>
   );

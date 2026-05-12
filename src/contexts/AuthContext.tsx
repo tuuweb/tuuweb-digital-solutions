@@ -11,6 +11,7 @@ interface AuthState {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -60,10 +61,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   };
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    return { error: error?.message ?? null };
+  };
+
   const signOut = async () => { await supabase.auth.signOut(); };
 
   return (
-    <AuthCtx.Provider value={{ user, session, profile, loading, signIn, signUp, signOut, isAdmin: profile?.role === "admin" }}>
+    <AuthCtx.Provider value={{ user, session, profile, loading, signIn, signUp, signInWithGoogle, signOut, isAdmin: profile?.role === "admin" }}>
       {children}
     </AuthCtx.Provider>
   );

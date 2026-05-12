@@ -7,11 +7,14 @@ import printingImg from "@/assets/printing.jpg";
 import techImg from "@/assets/tech-products.jpg";
 import { BrandsMarquee } from "@/components/BrandsMarquee";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { HomeSearch } from "@/components/HomeSearch";
+import { PokerCardsCarousel, type PokerCard } from "@/components/PokerCardsCarousel";
+import { SupportForm } from "@/components/SupportForm";
 import { TiendaSection } from "@/pages/Tienda";
 import { DirectorioSection } from "@/pages/Directorio";
 import { waLink, INSTAGRAM_URL } from "@/lib/contact";
 
-const sectionPreviews = [
+const sectionPreviews: PokerCard[] = [
   { to: "/servicios-web", icon: Globe, title: "Servicios Web", desc: "Landing, e-commerce, POS y sistemas a medida.", bullets: ["Diseño premium", "SEO optimizado", "Hosting incluido"], bg: heroBg },
   { to: "/impresiones", icon: Printer, title: "Impresiones & Avisos LED", desc: "Tarjetas, uniformes, vinilos y avisos luminosos.", bullets: ["Calidad premium", "Entrega rápida", "Diseño incluido"], bg: printingImg },
   { to: "/tienda", icon: ShoppingBag, title: "Tienda TuuWeb", desc: "Anuncios, electrónicos y accesorios al mejor precio.", bullets: ["Marcas reconocidas", "Garantía", "Envío nacional"], bg: techImg },
@@ -25,10 +28,10 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="absolute inset-0 bg-gradient-glow" />
-        <div className="relative container mx-auto px-4 pt-16 pb-10 text-center">
+        <div className="relative container mx-auto px-4 pt-12 pb-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 glass border border-primary/20 rounded-full px-4 py-1.5 text-sm mb-6"
+            className="inline-flex items-center gap-2 glass border border-primary/20 rounded-full px-4 py-1.5 text-sm mb-5"
           >
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <span className="text-muted-foreground">Soluciones digitales y físicas para emprendedores</span>
@@ -36,23 +39,19 @@ export default function Home() {
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] max-w-5xl mx-auto"
+            className="font-display text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05] max-w-5xl mx-auto"
           >
-            <span className="text-gradient">TuuWeb:</span> Potencia Digital y<br />
+            <span className="text-gradient">TuuWeb:</span> Potencia Digital y<br className="hidden sm:inline" />
             Soluciones Físicas para tu Negocio
           </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-            className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
-          >
-            Desde tu página web hasta tus uniformes, todo en un solo lugar y a precio de emprendedor.
-          </motion.p>
         </div>
       </section>
 
-      {/* CARRUSEL DE OFERTAS PRINCIPALES (admin editable) */}
+      {/* CARRUSEL PRINCIPAL */}
       <HeroCarousel />
+
+      {/* BUSCADOR + CATEGORÍAS */}
+      <HomeSearch />
 
       {/* QUICK NAV */}
       <section className="container mx-auto px-4 py-12">
@@ -77,49 +76,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MARCAS / CARRUSEL EN MOVIMIENTO */}
+      {/* MARCAS / CARRUSEL EN MOVIMIENTO SUAVE */}
       <BrandsMarquee />
 
-      {/* PREVIEW DE TODAS LAS SECCIONES */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+      {/* TODO LO QUE TU NEGOCIO NECESITA - estilo cartas en la mano */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="text-center max-w-2xl mx-auto mb-8">
           <h2 className="font-display text-3xl md:text-5xl font-bold">Todo lo que tu negocio necesita</h2>
-          <p className="text-muted-foreground mt-3">Explora cada sección y descubre cómo podemos ayudarte.</p>
+          <p className="text-muted-foreground mt-3">Desliza las cartas para descubrir cada sección.</p>
         </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {sectionPreviews.map((s, i) => (
-            <motion.div
-              key={s.to}
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-            >
-              <Link to={s.to} className="group relative block rounded-3xl overflow-hidden border border-border bg-card hover-lift">
-                <div className="relative h-48 overflow-hidden">
-                  <img src={s.bg} alt={s.title} className="w-full h-full object-cover group-hover:scale-110 transition-smooth duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
-                  <div className="absolute top-4 left-4 h-12 w-12 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-elegant">
-                    <s.icon className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-display text-2xl font-bold mb-2">{s.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{s.desc}</p>
-                  <ul className="space-y-1.5 mb-5">
-                    {s.bullets.map((b) => (
-                      <li key={b} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-success" /> {b}
-                      </li>
-                    ))}
-                  </ul>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:gap-3 transition-smooth">
-                    Explorar <ArrowRight className="h-4 w-4" />
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+        <PokerCardsCarousel items={sectionPreviews} />
       </section>
 
       {/* TIENDA EMBED */}
@@ -128,13 +94,13 @@ export default function Home() {
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tienda</p>
             <h2 className="font-display text-3xl md:text-4xl font-bold mt-1">Anuncios, electrónicos <span className="text-gradient">y más</span></h2>
-            <p className="text-muted-foreground mt-2 max-w-xl">Filtra por precio o busca lo que necesitas. Próximamente con stock en vivo.</p>
+            <p className="text-muted-foreground mt-2 max-w-xl">Filtra por precio o busca lo que necesitas.</p>
           </div>
           <Button asChild variant="outline">
             <Link to="/tienda">Ver tienda completa <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
         </div>
-        <TiendaSection embedded limit={4} />
+        <TiendaSection embedded limit={6} />
       </section>
 
       {/* DIRECTORIO EMBED */}
@@ -153,7 +119,7 @@ export default function Home() {
       </section>
 
       {/* WHY */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-16">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="font-display text-3xl md:text-5xl font-bold">¿Por qué <span className="text-gradient">TuuWeb</span>?</h2>
         </div>
@@ -170,6 +136,11 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* FORMULARIO DE CONTACTO / SOPORTE */}
+      <section className="container mx-auto px-4 pb-20">
+        <SupportForm />
       </section>
 
       {/* CTA FINAL */}

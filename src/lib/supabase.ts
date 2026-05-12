@@ -1,18 +1,20 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "";
+const rawUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "";
 const anon = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? "";
+// Sanitiza URL: sin trailing slash, sin espacios. Evita "Invalid path specified in request URL".
+const url = rawUrl.trim().replace(/\/+$/, "");
 
 export const isSupabaseConfigured = Boolean(
-  url && anon && !url.includes("YOUR_PROJECT") && !anon.includes("YOUR_ANON_KEY")
+  url && anon && /^https?:\/\//.test(url) && !url.includes("YOUR_PROJECT") && !anon.includes("YOUR_ANON_KEY")
 );
 
-// Stub seguro para que la app NO crashee si faltan las envs (preview, primer deploy, etc.)
 function createStub(): SupabaseClient {
   const err = { message: "Supabase no configurado. Define VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY." };
   const q: any = {
     select: () => q, insert: () => q, update: () => q, delete: () => q,
     eq: () => q, order: () => q, limit: () => q, single: () => Promise.resolve({ data: null, error: err }),
+    maybeSingle: () => Promise.resolve({ data: null, error: err }),
     then: (res: any) => res({ data: [], error: null }),
   };
   return {
@@ -21,6 +23,7 @@ function createStub(): SupabaseClient {
       getSession: async () => ({ data: { session: null }, error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
       signInWithPassword: async () => ({ data: null, error: err }),
+      signInWithOAuth: async () => ({ data: null, error: err }),
       signUp: async () => ({ data: null, error: err }),
       signOut: async () => ({ error: null }),
     },

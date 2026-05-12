@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Instagram, MessageCircle, Mail } from "lucide-react";
-import { WHATSAPP_DISPLAY, INSTAGRAM_URL, INSTAGRAM_HANDLE, waLink } from "@/lib/contact";
+import { WHATSAPP_DISPLAY, INSTAGRAM_URL, INSTAGRAM_HANDLE, EMAIL, waLink } from "@/lib/contact";
 
 export function Footer() {
   return (
@@ -18,6 +18,10 @@ export function Footer() {
                className="h-10 w-10 rounded-xl bg-success/90 flex items-center justify-center text-white hover:opacity-90 transition-smooth">
               <MessageCircle className="h-5 w-5" />
             </a>
+            <a href={`mailto:${EMAIL}`} aria-label="Email"
+               className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center hover:opacity-90 transition-smooth">
+              <Mail className="h-5 w-5" />
+            </a>
           </div>
         </div>
         <div>
@@ -34,7 +38,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> {WHATSAPP_DISPLAY}</li>
             <li className="flex items-center gap-2"><Instagram className="h-4 w-4" /> {INSTAGRAM_HANDLE}</li>
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hola@tuuweb.com</li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${EMAIL}`} className="hover:text-primary">{EMAIL}</a></li>
             <li>Colombia</li>
           </ul>
         </div>
