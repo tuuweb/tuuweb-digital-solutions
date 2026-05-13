@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_claims: {
+        Row: {
+          code_hash: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string
