@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { lovable } from "@/integrations/lovable";
 
-interface Profile { id: string; email: string; full_name: string | null; avatar_url: string | null; role: "admin" | "customer"; }
+interface Profile { id: string; email: string; full_name: string | null; avatar_url: string | null; }
 
 interface AuthState {
   user: User | null;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s); setUser(s?.user ?? null);
       if (s?.user) setTimeout(() => loadProfile(s.user.id), 0);
-      else setProfile(null);
+      else { setProfile(null); setIsAdmin(false); }
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -42,8 +44,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function loadProfile(uid: string) {
-    const { data } = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
+    const { data } = await supabase.from("profiles").select("id,email,full_name,avatar_url").eq("id", uid).maybeSingle();
     setProfile(data as Profile | null);
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin");
+    setIsAdmin(Boolean(roles?.length));
     setLoading(false);
   }
 
@@ -62,17 +66,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/` },
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: `${window.location.origin}/`,
+      extraParams: { prompt: "select_account" },
     });
-    return { error: error?.message ?? null };
+    return { error: result.error ? String(result.error instanceof Error ? result.error.message : result.error) : null };
   };
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
   return (
-    <AuthCtx.Provider value={{ user, session, profile, loading, signIn, signUp, signInWithGoogle, signOut, isAdmin: profile?.role === "admin" }}>
+    <AuthCtx.Provider value={{ user, session, profile, loading, signIn, signUp, signInWithGoogle, signOut, isAdmin }}>
       {children}
     </AuthCtx.Provider>
   );
