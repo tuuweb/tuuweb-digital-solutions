@@ -31,6 +31,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-brand-orange: var(--brand-orange);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -56,6 +57,7 @@
   --destructive: oklch(0.6 0.24 27);
   --destructive-foreground: oklch(0.99 0 0);
   --success: oklch(0.65 0.18 155);
+  --brand-orange: oklch(0.72 0.16 48);
   --border: oklch(0.92 0.012 250);
   --input: oklch(0.94 0.012 250);
   --ring: oklch(0.58 0.22 255);
@@ -88,6 +90,7 @@
   --destructive: oklch(0.65 0.22 22);
   --destructive-foreground: oklch(0.97 0.005 250);
   --success: oklch(0.7 0.18 155);
+  --brand-orange: oklch(0.76 0.14 55);
   --border: oklch(0.28 0.03 255);
   --input: oklch(0.25 0.03 255);
   --ring: oklch(0.7 0.2 240);
@@ -102,12 +105,14 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html { font-family: var(--font-sans); }
+  html { font-family: var(--font-sans); overflow-x: hidden; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    width: 100%;
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 }
