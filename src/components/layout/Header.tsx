@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { Moon, Sun, User as UserIcon, LogOut, Shield, Menu, LogIn } from "lucide-react";
+import { Moon, Sun, User as UserIcon, LogOut, Shield, Menu, LogIn, ShoppingCart, PackageSearch } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,15 +18,17 @@ const links = [
 ];
 
 export function Header() {
-  const { theme, toggle } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { user, profile, signOut, isAdmin } = useAuth();
   const [mobile, setMobile] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 glass border-b border-border/50">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 border-b border-border bg-card shadow-card">
+      <div className="container mx-auto px-3 sm:px-4 min-h-16 flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center gap-2 group">
-          <img src={logo} alt="TuuWeb" className="h-10 w-auto rounded-lg group-hover:scale-110 transition-smooth" />
+          <span className="rounded-2xl border border-brand-orange/30 bg-secondary px-2.5 py-1.5 shadow-card">
+            <img src={logo} alt="TuuWeb" className="h-8 w-8 object-contain rounded-md group-hover:scale-110 transition-smooth" />
+          </span>
           <span className="font-display text-xl font-bold text-gradient">TuuWeb</span>
         </Link>
 
@@ -47,9 +49,10 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={toggle} aria-label="Cambiar tema">
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+          <div className="hidden sm:flex rounded-full border border-border bg-secondary p-1">
+            <Button type="button" variant={theme === "light" ? "default" : "ghost"} size="sm" onClick={() => setTheme("light")} className={theme === "light" ? "h-8 rounded-full bg-brand-orange text-primary-foreground" : "h-8 rounded-full"}><Sun className="h-4 w-4" /></Button>
+            <Button type="button" variant={theme === "dark" ? "default" : "ghost"} size="sm" onClick={() => setTheme("dark")} className={theme === "dark" ? "h-8 rounded-full bg-brand-orange text-primary-foreground" : "h-8 rounded-full"}><Moon className="h-4 w-4" /></Button>
+          </div>
 
           {user ? (
             <DropdownMenu>
@@ -68,6 +71,13 @@ export function Header() {
                     <DropdownMenuSeparator />
                   </>
                 )}
+                <DropdownMenuItem asChild>
+                  <Link to="/mi-cuenta"><ShoppingCart className="h-4 w-4 mr-2" />Mi cuenta</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/mi-cuenta"><PackageSearch className="h-4 w-4 mr-2" />Rastreo / historial</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="h-4 w-4 mr-2" />Cerrar sesión
                 </DropdownMenuItem>
