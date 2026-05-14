@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { isSupabaseConfigured } from "@/lib/supabase";
 import logo from "@/assets/logo.png";
 
 export default function Auth() {
@@ -18,7 +17,6 @@ export default function Auth() {
 
   const handle = async (e: React.FormEvent<HTMLFormElement>, mode: "in" | "up") => {
     e.preventDefault();
-    if (!isSupabaseConfigured) { toast.error("Supabase no configurado. Revisa VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY."); return; }
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get("email")).trim();
     const password = String(fd.get("password"));
@@ -32,7 +30,6 @@ export default function Auth() {
   };
 
   const google = async () => {
-    if (!isSupabaseConfigured) { toast.error("Supabase no configurado."); return; }
     setLoading(true);
     const { error } = await signInWithGoogle();
     setLoading(false);

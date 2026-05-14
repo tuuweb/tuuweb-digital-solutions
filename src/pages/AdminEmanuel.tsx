@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Admin from "./Admin";
 
-const ADMIN_PASSWORD = "55249964";
+const ADMIN_PASSWORD = "eperez5622";
 const STORAGE_KEY = "tuuweb_admin_unlocked";
 
 export default function AdminEmanuel() {
