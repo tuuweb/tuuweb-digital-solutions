@@ -4,22 +4,22 @@ import { WHATSAPP_DISPLAY, INSTAGRAM_URL, INSTAGRAM_HANDLE, EMAIL, waLink } from
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/50 mt-24 bg-secondary/30">
+    <footer className="border-t border-brand-orange/40 mt-24 bg-brand-orange text-white">
       <div className="container mx-auto px-4 py-12 grid md:grid-cols-4 gap-8">
         <div>
-          <h3 className="font-display text-lg font-bold text-gradient">TuuWeb</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Potencia digital y soluciones físicas para tu negocio.</p>
+          <h3 className="font-display text-lg font-bold">TuuWeb</h3>
+          <p className="mt-2 text-sm text-white/85">Potencia digital y soluciones físicas para tu negocio.</p>
           <div className="flex gap-3 mt-4">
             <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram"
-               className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center text-primary-foreground hover:opacity-90 transition-smooth">
+               className="h-10 w-10 rounded-xl bg-white/18 border border-white/25 flex items-center justify-center text-white hover:bg-white/25 transition-smooth">
               <Instagram className="h-5 w-5" />
             </a>
             <a href={waLink("Hola TuuWeb")} target="_blank" rel="noreferrer" aria-label="WhatsApp"
-               className="h-10 w-10 rounded-xl bg-success/90 flex items-center justify-center text-white hover:opacity-90 transition-smooth">
+               className="h-10 w-10 rounded-xl bg-white/18 border border-white/25 flex items-center justify-center text-white hover:bg-white/25 transition-smooth">
               <MessageCircle className="h-5 w-5" />
             </a>
             <a href={`mailto:${EMAIL}`} aria-label="Email"
-               className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center hover:opacity-90 transition-smooth">
+               className="h-10 w-10 rounded-xl bg-white/18 border border-white/25 flex items-center justify-center text-white hover:bg-white/25 transition-smooth">
               <Mail className="h-5 w-5" />
             </a>
           </div>
