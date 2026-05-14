@@ -1,0 +1,1 @@
+revoke execute on function public.redeem_admin_code(text) from anon, authenticated, public;

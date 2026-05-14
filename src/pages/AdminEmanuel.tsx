@@ -3,25 +3,44 @@ import { Lock, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import Admin from "./Admin";
 
-const ADMIN_PASSWORD = "55249964";
 const STORAGE_KEY = "tuuweb_admin_unlocked";
 
+async function sha256(value: string) {
+  const bytes = new TextEncoder().encode(value);
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export default function AdminEmanuel() {
+  const { user, isAdmin } = useAuth();
   const [unlocked, setUnlocked] = useState(false);
   const [pwd, setPwd] = useState("");
   const [err, setErr] = useState("");
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     if (sessionStorage.getItem(STORAGE_KEY) === "1") setUnlocked(true);
   }, []);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwd === ADMIN_PASSWORD) {
+    setChecking(true);
+    if (!user) {
+      setChecking(false);
+      setErr("Primero inicia sesión y vuelve a esta ruta.");
+      return;
+    }
+    const code_hash = await sha256(pwd);
+    const { error } = await supabase.from("admin_claims").insert({ user_id: user.id, code_hash });
+    setChecking(false);
+    if (!error) {
       sessionStorage.setItem(STORAGE_KEY, "1");
       setUnlocked(true);
+      if (!isAdmin) window.location.reload();
     } else {
       setErr("Contraseña incorrecta");
     }
@@ -52,7 +71,7 @@ export default function AdminEmanuel() {
               />
               {err && <p className="text-destructive text-xs mt-2">{err}</p>}
             </div>
-            <Button type="submit" className="w-full h-11 bg-gradient-primary text-primary-foreground">Entrar al panel</Button>
+            <Button type="submit" disabled={checking} className="w-full h-11 bg-gradient-primary text-primary-foreground">Entrar al panel</Button>
           </form>
         </div>
       </div>
