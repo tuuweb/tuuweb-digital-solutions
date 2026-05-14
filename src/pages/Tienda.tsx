@@ -104,16 +104,12 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
 
       {showOverlay && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="glass border border-primary/30 rounded-3xl p-8 md:p-10 max-w-lg text-center shadow-elegant pointer-events-auto">
-            <Sparkles className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-            <h2 className="font-display text-3xl font-bold mb-3">PRÓXIMAMENTE</h2>
-            <p className="text-muted-foreground">
-              Estamos preparando anuncios, artículos electrónicos y mucho más, todo al mejor precio.
-            </p>
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand-orange/40 bg-card/95 backdrop-blur px-4 py-2 shadow-card pointer-events-auto">
+            <Sparkles className="h-4 w-4 text-brand-orange animate-pulse" />
+            <span className="text-sm font-semibold tracking-wide">Próximamente</span>
             {embedded && (
-              <Button asChild className="mt-5 bg-gradient-primary text-primary-foreground">
-                <a href={waLink("Hola, quiero saber cuándo abre la tienda")} target="_blank" rel="noreferrer">Avísame por WhatsApp</a>
-              </Button>
+              <a href={waLink("Hola, quiero saber cuándo abre la tienda")} target="_blank" rel="noreferrer"
+                className="ml-2 text-xs font-medium text-brand-orange hover:underline">Avísame</a>
             )}
           </div>
         </div>
