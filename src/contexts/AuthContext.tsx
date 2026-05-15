@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { lovable } from "@/integrations/lovable";
 
 interface Profile { id: string; email: string; full_name: string | null; avatar_url: string | null; }
 
@@ -52,11 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) return { error: "Supabase no está configurado. Agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu .env." };
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
   };
 
   const signUp = async (email: string, password: string, full_name: string) => {
+    if (!isSupabaseConfigured) return { error: "Supabase no está configurado. Agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu .env." };
     const redirectTo = `${window.location.origin}/`;
     const { error } = await supabase.auth.signUp({
       email, password,
@@ -66,11 +67,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/`,
-      extraParams: { prompt: "select_account" },
+    if (!isSupabaseConfigured) return { error: "Supabase no está configurado. Agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu .env." };
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/`,
+        queryParams: { prompt: "select_account" },
+      },
     });
-    return { error: result.error ? String(result.error instanceof Error ? result.error.message : result.error) : null };
+    return { error: error?.message ?? null };
   };
 
   const signOut = async () => { await supabase.auth.signOut(); };
