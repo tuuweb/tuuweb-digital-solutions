@@ -42,7 +42,7 @@ export function BrandsMarquee() {
       <div className="container mx-auto px-4 mb-8 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Marcas que confían en nosotros</p>
         <h2 className="font-display text-2xl md:text-3xl font-bold mt-2">
-          Empresas, negocios y locales <span className="text-gradient">creados con TuuWeb</span>
+          Empresas, negocios y locales <span className="text-gradient">que impulsamos</span>
         </h2>
       </div>
 
@@ -53,14 +53,13 @@ export function BrandsMarquee() {
         <div className="flex gap-8 animate-marquee group-hover:[animation-play-state:paused]" style={{ width: "max-content" }}>
           {loop.map((b, i) => {
             const card = (
-              <div className="flex flex-col items-center gap-2 min-w-[170px] h-28 px-6 rounded-2xl border border-white/80 bg-card/90 hover:bg-card hover:border-brand-orange/50 transition-smooth justify-center shadow-card hover-lift">
+              <div className="flex min-w-[150px] items-center justify-center rounded-2xl border border-white/80 bg-card/90 px-6 py-5 shadow-card transition-smooth animate-float hover:border-brand-orange/50 hover:bg-card hover:scale-105">
                 <img
                   src={b.logo_url}
                   alt={b.name}
-                  className="max-h-12 max-w-[120px] object-contain grayscale hover:grayscale-0 transition-smooth"
+                  className="max-h-16 max-w-[120px] object-contain transition-smooth"
                   loading="lazy"
                 />
-                <span className="text-xs text-muted-foreground truncate max-w-[140px]">{b.name}</span>
               </div>
             );
             return b.website_url ? (
