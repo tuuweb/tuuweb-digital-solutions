@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { lovable } from "@/integrations/lovable";
 
 interface Profile { id: string; email: string; full_name: string | null; avatar_url: string | null; }
 
@@ -31,32 +30,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s); setUser(s?.user ?? null);
-      if (s?.user) setTimeout(() => loadProfile(s.user.id), 0);
+      if (s?.user) setTimeout(() => loadProfile(s.user), 0);
       else { setProfile(null); setIsAdmin(false); }
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s); setUser(s?.user ?? null);
-      if (s?.user) loadProfile(s.user.id); else setLoading(false);
+      if (s?.user) loadProfile(s.user); else setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function loadProfile(uid: string) {
-    const { data } = await supabase.from("profiles").select("id,email,full_name,avatar_url").eq("id", uid).maybeSingle();
-    setProfile(data as Profile | null);
-    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin");
+  async function loadProfile(currentUser: User) {
+    const fallback: Profile = {
+      id: currentUser.id,
+      email: currentUser.email ?? "",
+      full_name: (currentUser.user_metadata?.full_name ?? currentUser.user_metadata?.name ?? null) as string | null,
+      avatar_url: (currentUser.user_metadata?.avatar_url ?? null) as string | null,
+    };
+    const { data } = await supabase.from("profiles").select("id,email,full_name,avatar_url").eq("id", currentUser.id).maybeSingle();
+    if (data) setProfile(data as Profile);
+    else {
+      setProfile(fallback);
+      await supabase.from("profiles").upsert(fallback, { onConflict: "id" });
+    }
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", currentUser.id).eq("role", "admin");
     setIsAdmin(Boolean(roles?.length));
     setLoading(false);
   }
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) return { error: "Supabase no está configurado. Agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu .env." };
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
   };
 
   const signUp = async (email: string, password: string, full_name: string) => {
+    if (!isSupabaseConfigured) return { error: "Supabase no está configurado. Agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu .env." };
     const redirectTo = `${window.location.origin}/`;
     const { error } = await supabase.auth.signUp({
       email, password,
@@ -66,11 +77,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/`,
-      extraParams: { prompt: "select_account" },
+    if (!isSupabaseConfigured) return { error: "Supabase no está configurado. Agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu .env." };
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/`,
+        queryParams: { prompt: "select_account" },
+      },
     });
-    return { error: result.error ? String(result.error instanceof Error ? result.error.message : result.error) : null };
+    return { error: error?.message ?? null };
   };
 
   const signOut = async () => { await supabase.auth.signOut(); };

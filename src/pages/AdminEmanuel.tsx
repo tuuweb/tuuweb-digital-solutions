@@ -3,17 +3,11 @@ import { Lock, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import Admin from "./Admin";
 
 const STORAGE_KEY = "tuuweb_admin_unlocked";
-
-async function sha256(value: string) {
-  const bytes = new TextEncoder().encode(value);
-  const hash = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 export default function AdminEmanuel() {
   const { user, isAdmin } = useAuth();
@@ -34,10 +28,14 @@ export default function AdminEmanuel() {
       setErr("Primero inicia sesión y vuelve a esta ruta.");
       return;
     }
-    const code_hash = await sha256(pwd);
-    const { error } = await supabase.from("admin_claims").insert({ user_id: user.id, code_hash });
+    if (!isSupabaseConfigured) {
+      setChecking(false);
+      setErr("Configura Supabase primero en tu .env.");
+      return;
+    }
+    const { data, error } = await supabase.rpc("redeem_admin_code", { _code: pwd });
     setChecking(false);
-    if (!error) {
+    if (!error && data === true) {
       sessionStorage.setItem(STORAGE_KEY, "1");
       setUnlocked(true);
       if (!isAdmin) window.location.reload();

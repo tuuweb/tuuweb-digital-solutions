@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
@@ -27,6 +27,7 @@ const defaults: Slide[] = [
 export function HeroCarousel() {
   const [slides, setSlides] = useState<Slide[]>(defaults);
   const [idx, setIdx] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -51,8 +52,21 @@ export function HeroCarousel() {
   const next = () => setIdx((i) => (i + 1) % slides.length);
   const prev = () => setIdx((i) => (i - 1 + slides.length) % slides.length);
 
+  const handleTouchEnd = (x: number) => {
+    if (touchStartX.current === null) return;
+    const delta = touchStartX.current - x;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 45) return;
+    if (delta > 0) next();
+    else prev();
+  };
+
   return (
-    <section className="relative h-[480px] md:h-[560px] overflow-hidden">
+    <section
+      className="relative mt-4 h-[520px] touch-pan-y overflow-hidden md:mt-6 md:h-[600px]"
+      onTouchStart={(e) => { touchStartX.current = e.touches[0]?.clientX ?? null; }}
+      onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0]?.clientX ?? 0)}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
@@ -104,11 +118,11 @@ export function HeroCarousel() {
       {slides.length > 1 && (
         <>
           <button onClick={prev} aria-label="Anterior"
-            className="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full glass border border-border flex items-center justify-center hover:bg-card transition-smooth">
+            className="absolute left-4 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border glass transition-smooth hover:bg-card md:flex">
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button onClick={next} aria-label="Siguiente"
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full glass border border-border flex items-center justify-center hover:bg-card transition-smooth">
+            className="absolute right-4 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border glass transition-smooth hover:bg-card md:flex">
             <ChevronRight className="h-5 w-5" />
           </button>
 
