@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Zap, Globe, Printer, ShoppingBag, Check, MessageCircle } from "lucide-react";
+import { ArrowRight, Zap, Globe, Printer, ShoppingBag, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 import printingImg from "@/assets/printing.jpg";
@@ -24,29 +24,6 @@ const sectionPreviews: PokerCard[] = [
 export default function Home() {
   return (
     <>
-      {/* HERO INTRO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero" />
-        <div className="absolute inset-0 bg-gradient-glow" />
-        <div className="relative container mx-auto px-4 pt-12 pb-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 glass border border-primary/20 rounded-full px-4 py-1.5 text-sm mb-5"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-muted-foreground">Soluciones digitales y físicas para emprendedores</span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="font-display text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05] max-w-5xl mx-auto"
-          >
-            <span className="text-gradient">TuuWeb:</span> Potencia Digital y<br className="hidden sm:inline" />
-            Soluciones Físicas para tu Negocio
-          </motion.h1>
-        </div>
-      </section>
-
       {/* CARRUSEL PRINCIPAL */}
       <HeroCarousel />
 
