@@ -52,7 +52,7 @@ export function HeroCarousel() {
   const prev = () => setIdx((i) => (i - 1 + slides.length) % slides.length);
 
   return (
-    <section className="relative h-[480px] md:h-[560px] overflow-hidden">
+    <section className="relative mt-4 h-[520px] overflow-hidden md:mt-6 md:h-[600px]">
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
@@ -104,11 +104,11 @@ export function HeroCarousel() {
       {slides.length > 1 && (
         <>
           <button onClick={prev} aria-label="Anterior"
-            className="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full glass border border-border flex items-center justify-center hover:bg-card transition-smooth">
+            className="absolute left-4 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border glass transition-smooth hover:bg-card md:flex">
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button onClick={next} aria-label="Siguiente"
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full glass border border-border flex items-center justify-center hover:bg-card transition-smooth">
+            className="absolute right-4 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border glass transition-smooth hover:bg-card md:flex">
             <ChevronRight className="h-5 w-5" />
           </button>
 
