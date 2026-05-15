@@ -117,7 +117,7 @@
     overflow-x: hidden;
     width: 100%;
   }
-  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
+  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: 0; }
 }
 
 @layer utilities {
