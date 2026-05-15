@@ -107,9 +107,9 @@ export function PokerCardsCarousel({ items }: { items: PokerCard[] }) {
         })}
       </div>
 
-      <div className="flex items-center justify-center gap-3 mt-2">
+      <div className="mt-2 flex items-center justify-center gap-3">
         <button onClick={prev} aria-label="Anterior"
-          className="h-10 w-10 rounded-full glass border border-border flex items-center justify-center hover:bg-card transition-smooth">
+          className="hidden h-10 w-10 items-center justify-center rounded-full border border-border glass transition-smooth hover:bg-card md:flex">
           <ChevronLeft className="h-4 w-4" />
         </button>
         <div className="flex gap-1.5">
@@ -119,7 +119,7 @@ export function PokerCardsCarousel({ items }: { items: PokerCard[] }) {
           ))}
         </div>
         <button onClick={next} aria-label="Siguiente"
-          className="h-10 w-10 rounded-full glass border border-border flex items-center justify-center hover:bg-card transition-smooth">
+          className="hidden h-10 w-10 items-center justify-center rounded-full border border-border glass transition-smooth hover:bg-card md:flex">
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
