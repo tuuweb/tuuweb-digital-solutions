@@ -3,7 +3,7 @@ import { Lock, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import Admin from "./Admin";
 
@@ -32,6 +32,11 @@ export default function AdminEmanuel() {
     if (!user) {
       setChecking(false);
       setErr("Primero inicia sesión y vuelve a esta ruta.");
+      return;
+    }
+    if (!isSupabaseConfigured) {
+      setChecking(false);
+      setErr("Configura Supabase primero en tu .env.");
       return;
     }
     const code_hash = await sha256(pwd);
