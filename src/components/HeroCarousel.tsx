@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
@@ -27,6 +27,7 @@ const defaults: Slide[] = [
 export function HeroCarousel() {
   const [slides, setSlides] = useState<Slide[]>(defaults);
   const [idx, setIdx] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -51,8 +52,21 @@ export function HeroCarousel() {
   const next = () => setIdx((i) => (i + 1) % slides.length);
   const prev = () => setIdx((i) => (i - 1 + slides.length) % slides.length);
 
+  const handleTouchEnd = (x: number) => {
+    if (touchStartX.current === null) return;
+    const delta = touchStartX.current - x;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 45) return;
+    if (delta > 0) next();
+    else prev();
+  };
+
   return (
-    <section className="relative mt-4 h-[520px] overflow-hidden md:mt-6 md:h-[600px]">
+    <section
+      className="relative mt-4 h-[520px] touch-pan-y overflow-hidden md:mt-6 md:h-[600px]"
+      onTouchStart={(e) => { touchStartX.current = e.touches[0]?.clientX ?? null; }}
+      onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0]?.clientX ?? 0)}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
