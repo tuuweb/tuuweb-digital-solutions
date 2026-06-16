@@ -10,6 +10,8 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeSearch } from "@/components/HomeSearch";
 import { PokerCardsCarousel, type PokerCard } from "@/components/PokerCardsCarousel";
 import { SupportForm } from "@/components/SupportForm";
+import { SponsorGallery } from "@/components/SponsorGallery";
+import { PromoPopup } from "@/components/PromoPopup";
 import { TiendaSection } from "@/pages/Tienda";
 import { DirectorioSection } from "@/pages/Directorio";
 import { waLink, INSTAGRAM_URL } from "@/lib/contact";
@@ -24,8 +26,14 @@ const sectionPreviews: PokerCard[] = [
 export default function Home() {
   return (
     <>
+      {/* POPUP PROMOCIONAL */}
+      <PromoPopup />
+
       {/* CARRUSEL PRINCIPAL */}
       <HeroCarousel />
+
+      {/* GALERÍA DE PATROCINADOS (se oculta si no hay activos) */}
+      <SponsorGallery />
 
       {/* BUSCADOR + CATEGORÍAS */}
       <HomeSearch />

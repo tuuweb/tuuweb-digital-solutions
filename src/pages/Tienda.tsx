@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase, formatCOP, isSupabaseConfigured } from "@/lib/supabase";
 import techImg from "@/assets/tech-products.jpg";
 import { waLink } from "@/lib/contact";
+import { ProductQuoteDialog, type QuoteItem } from "@/components/ProductQuoteDialog";
 
 interface Product {
   id: string; name: string; description: string;
@@ -20,6 +21,7 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("asc");
+  const [quoteItem, setQuoteItem] = useState<QuoteItem | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) { setLoading(false); return; }
@@ -79,17 +81,16 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
             {filtered.map((p, i) => (
               <motion.div key={p.id}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className="shrink-0 w-[78%] sm:w-auto snap-center rounded-2xl border border-border bg-card overflow-hidden hover-lift">
+                onClick={() => setQuoteItem({ name: p.name, description: p.description, price_cop: p.price_cop, image: p.images?.[0] ?? techImg })}
+                className="shrink-0 w-[78%] sm:w-auto snap-center rounded-2xl border border-border bg-card overflow-hidden hover-lift cursor-pointer">
                 <img src={p.images?.[0] ?? techImg} alt={p.name} className="w-full h-48 object-cover" />
                 <div className="p-5">
                   <h3 className="font-semibold mb-1">{p.name}</h3>
                   <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-gradient text-lg">{formatCOP(p.price_cop)}</span>
-                    <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
-                      <a href={waLink(`Hola, me interesa: ${p.name}`)} target="_blank" rel="noreferrer">
-                        <ShoppingCart className="h-4 w-4" />
-                      </a>
+                    <Button size="sm" className="bg-gradient-primary text-primary-foreground pointer-events-none">
+                      <ShoppingCart className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -114,6 +115,7 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
           </div>
         </div>
       )}
+      <ProductQuoteDialog item={quoteItem} open={!!quoteItem} onOpenChange={(o) => !o && setQuoteItem(null)} />
     </div>
   );
 }

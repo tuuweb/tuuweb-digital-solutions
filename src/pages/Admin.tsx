@@ -11,21 +11,31 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
 interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; }
 interface Rec { id: string; business_name: string; category: string; description: string; website_url: string | null; logo_url: string | null; is_coming_soon: boolean; }
-interface SoldProject { id: string; project_name: string; category: string; client_name: string; client_contact: string | null; domain: string | null; price_cop: number; sold_at: string; notes: string | null; status: string; }
+interface SoldProject {
+  id: string; numero: number | null; cliente: string; dominio: string | null; tipo_pagina: string | null;
+  estado_proyecto: string | null; estado_pagina: string | null; cotizacion_cop: number | null;
+  proveedor_dominio: string | null; correo_dominio: string | null; fecha_renovacion_dominio: string | null;
+  proveedor_hosting: string | null; correo_hosting: string | null; telefono_hosting: string | null; fecha_renovacion_hosting: string | null;
+  base_datos: string | null; correo_bd: string | null; ia_usada: string | null; correo_ia: string | null; notas: string | null;
+}
 interface Brand { id: string; name: string; logo_url: string; website_url: string | null; sort_order: number; is_active: boolean; }
 interface HeroSlide { id: string; title: string; subtitle: string | null; image_url: string; cta_label: string | null; cta_link: string | null; sort_order: number; is_active: boolean; }
 interface SupportMsg { id: string; name: string; email: string; phone: string | null; topic: string | null; message: string; status: string; created_at: string; }
+interface Sponsor { id: string; titulo: string; descripcion: string | null; imagen_url: string | null; link_url: string | null; activo: boolean; orden: number; }
+interface Popup { id: string; titulo: string; mensaje: string | null; codigo: string | null; imagen_url: string | null; cta_text: string | null; cta_url: string | null; activo: boolean; frecuencia: string; fecha_inicio: string | null; fecha_fin: string | null; }
+interface SiteContent { key: string; value: string | null; }
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
 
   if (loading) return <div className="container mx-auto px-4 py-20 text-center">Cargando...</div>;
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/admin-emanuel" replace />;
   if (!isAdmin) return (
     <div className="container mx-auto px-4 py-20 text-center">
       <ShieldAlert className="h-12 w-12 text-destructive mx-auto mb-4" />
@@ -39,27 +49,38 @@ export default function Admin() {
       <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Panel <span className="text-gradient">Admin</span></h1>
       <p className="text-muted-foreground mb-8">Gestiona productos, directorio, proyectos vendidos y marcas aliadas.</p>
 
-      <Tabs defaultValue="messages">
+      <Tabs defaultValue="sold">
         <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Tracker proyectos</TabsTrigger>
           <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
-          <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Proyectos vendidos</TabsTrigger>
-          <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas (carrusel)</TabsTrigger>
+          <TabsTrigger value="sponsors"><Star className="h-4 w-4 mr-2" />Patrocinados</TabsTrigger>
+          <TabsTrigger value="popups"><Megaphone className="h-4 w-4 mr-2" />Popups</TabsTrigger>
+          <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas</TabsTrigger>
           <TabsTrigger value="products"><Package className="h-4 w-4 mr-2" />Productos</TabsTrigger>
           <TabsTrigger value="directory"><Building2 className="h-4 w-4 mr-2" />Directorio</TabsTrigger>
+          <TabsTrigger value="content"><FileText className="h-4 w-4 mr-2" />Textos</TabsTrigger>
         </TabsList>
+        <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
-        <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
+        <TabsContent value="sponsors" className="mt-6"><SponsorsAdmin /></TabsContent>
+        <TabsContent value="popups" className="mt-6"><PopupsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
         <TabsContent value="products" className="mt-6"><ProductsAdmin /></TabsContent>
         <TabsContent value="directory" className="mt-6"><DirectoryAdmin /></TabsContent>
+        <TabsContent value="content" className="mt-6"><SiteContentAdmin /></TabsContent>
       </Tabs>
     </div>
   );
 }
 
-/* ======================= PROYECTOS VENDIDOS ======================= */
+/* ======================= PROYECTOS VENDIDOS (TRACKER) ======================= */
+function daysUntil(d: string | null): number | null {
+  if (!d) return null;
+  return Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
+}
+
 function SoldProjectsAdmin() {
   const [items, setItems] = useState<SoldProject[]>([]);
   const [editing, setEditing] = useState<SoldProject | null>(null);
@@ -67,7 +88,7 @@ function SoldProjectsAdmin() {
   const [filter, setFilter] = useState<string>("all");
 
   const load = async () => {
-    const { data } = await supabase.from("sold_projects").select("*").order("sold_at", { ascending: false });
+    const { data } = await supabase.from("sold_projects").select("*").order("numero", { ascending: true });
     setItems((data ?? []) as SoldProject[]);
   };
   useEffect(() => { load(); }, []);
@@ -75,16 +96,27 @@ function SoldProjectsAdmin() {
   const save = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const v = (k: string) => { const x = String(fd.get(k) ?? "").trim(); return x === "" ? null : x; };
     const payload = {
-      project_name: String(fd.get("project_name")),
-      category: String(fd.get("category")),
-      client_name: String(fd.get("client_name")),
-      client_contact: String(fd.get("client_contact") ?? "") || null,
-      domain: String(fd.get("domain") ?? "") || null,
-      price_cop: Number(fd.get("price_cop") ?? 0),
-      sold_at: String(fd.get("sold_at")),
-      notes: String(fd.get("notes") ?? "") || null,
-      status: String(fd.get("status") ?? "activo"),
+      numero: fd.get("numero") ? Number(fd.get("numero")) : null,
+      cliente: String(fd.get("cliente")),
+      dominio: v("dominio"),
+      tipo_pagina: v("tipo_pagina"),
+      estado_proyecto: v("estado_proyecto"),
+      estado_pagina: v("estado_pagina"),
+      cotizacion_cop: fd.get("cotizacion_cop") ? Number(fd.get("cotizacion_cop")) : 0,
+      proveedor_dominio: v("proveedor_dominio"),
+      correo_dominio: v("correo_dominio"),
+      fecha_renovacion_dominio: v("fecha_renovacion_dominio"),
+      proveedor_hosting: v("proveedor_hosting"),
+      correo_hosting: v("correo_hosting"),
+      telefono_hosting: v("telefono_hosting"),
+      fecha_renovacion_hosting: v("fecha_renovacion_hosting"),
+      base_datos: v("base_datos"),
+      correo_bd: v("correo_bd"),
+      ia_usada: v("ia_usada"),
+      correo_ia: v("correo_ia"),
+      notas: v("notas"),
     };
     const { error } = editing
       ? await supabase.from("sold_projects").update(payload).eq("id", editing.id)
@@ -99,101 +131,363 @@ function SoldProjectsAdmin() {
     if (error) toast.error(error.message); else { toast.success("Eliminado"); load(); }
   };
 
-  const categories = Array.from(new Set(items.map((i) => i.category))).filter(Boolean);
-  const filtered = filter === "all" ? items : items.filter((i) => i.category === filter);
-  const total = filtered.reduce((sum, i) => sum + Number(i.price_cop || 0), 0);
+  const exportExcel = () => {
+    const rows = items.map((p) => ({
+      "N°": p.numero,
+      "Cliente / Negocio": p.cliente,
+      "Dominio": p.dominio,
+      "Tipo de Página": p.tipo_pagina,
+      "Estado Proyecto": p.estado_proyecto,
+      "Estado Página": p.estado_pagina,
+      "Cotización (COP)": p.cotizacion_cop,
+      "Proveedor Dominio": p.proveedor_dominio,
+      "Correo Dominio": p.correo_dominio,
+      "Renovación Dominio": p.fecha_renovacion_dominio,
+      "Días Renov. Dom.": daysUntil(p.fecha_renovacion_dominio),
+      "Proveedor Hosting": p.proveedor_hosting,
+      "Correo Hosting": p.correo_hosting,
+      "Tel. Hosting": p.telefono_hosting,
+      "Renovación Hosting": p.fecha_renovacion_hosting,
+      "Días Renov. Host.": daysUntil(p.fecha_renovacion_hosting),
+      "Base de Datos": p.base_datos,
+      "Correo BD": p.correo_bd,
+      "IA Usada": p.ia_usada,
+      "Correo IA": p.correo_ia,
+      "Notas": p.notas,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Proyectos");
+    XLSX.writeFile(wb, `tracker_tuuweb_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const estados = Array.from(new Set(items.map((i) => i.estado_proyecto).filter(Boolean) as string[]));
+  const filtered = filter === "all" ? items : items.filter((i) => i.estado_proyecto === filter);
+  const total = filtered.reduce((s, i) => s + Number(i.cotizacion_cop || 0), 0);
+  const proxRenov = items.filter((p) => {
+    const d1 = daysUntil(p.fecha_renovacion_dominio);
+    const d2 = daysUntil(p.fecha_renovacion_hosting);
+    return (d1 !== null && d1 <= 30) || (d2 !== null && d2 <= 30);
+  }).length;
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>Todas ({items.length})</Button>
-          {categories.map((c) => (
+          <Button size="sm" variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>Todos ({items.length})</Button>
+          {estados.map((c) => (
             <Button key={c} size="sm" variant={filter === c ? "default" : "outline"} onClick={() => setFilter(c)}>{c}</Button>
           ))}
         </div>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={exportExcel}><Download className="h-4 w-4 mr-2" />Exportar Excel</Button>
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo proyecto</Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[85vh] overflow-y-auto max-w-2xl">
+              <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} proyecto</DialogTitle></DialogHeader>
+              <form onSubmit={save} className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div><Label>N°</Label><Input type="number" name="numero" defaultValue={editing?.numero ?? items.length + 1} /></div>
+                  <div className="col-span-2"><Label>Cliente / Negocio</Label><Input name="cliente" defaultValue={editing?.cliente} required /></div>
+                  <div className="col-span-2"><Label>Dominio</Label><Input name="dominio" defaultValue={editing?.dominio ?? ""} placeholder="ejemplo.com" /></div>
+                  <div><Label>Tipo Página</Label><Input name="tipo_pagina" defaultValue={editing?.tipo_pagina ?? ""} placeholder="Web/POS" /></div>
+                  <div><Label>Estado Proyecto</Label><Input name="estado_proyecto" defaultValue={editing?.estado_proyecto ?? "En proceso"} /></div>
+                  <div><Label>Estado Página</Label><Input name="estado_pagina" defaultValue={editing?.estado_pagina ?? "Inactiva"} /></div>
+                  <div><Label>Cotización (COP)</Label><Input type="number" name="cotizacion_cop" defaultValue={editing?.cotizacion_cop ?? 0} /></div>
+                </div>
+                <fieldset className="rounded-lg border border-border p-3 space-y-3">
+                  <legend className="text-xs font-semibold px-1">Dominio</legend>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div><Label>Proveedor</Label><Input name="proveedor_dominio" defaultValue={editing?.proveedor_dominio ?? ""} placeholder="Spaceship, GoDaddy..." /></div>
+                    <div><Label>Correo</Label><Input name="correo_dominio" defaultValue={editing?.correo_dominio ?? ""} /></div>
+                    <div><Label>Renovación</Label><Input type="date" name="fecha_renovacion_dominio" defaultValue={editing?.fecha_renovacion_dominio ?? ""} /></div>
+                  </div>
+                </fieldset>
+                <fieldset className="rounded-lg border border-border p-3 space-y-3">
+                  <legend className="text-xs font-semibold px-1">Hosting</legend>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div><Label>Proveedor</Label><Input name="proveedor_hosting" defaultValue={editing?.proveedor_hosting ?? ""} placeholder="Vercel, VPS..." /></div>
+                    <div><Label>Correo</Label><Input name="correo_hosting" defaultValue={editing?.correo_hosting ?? ""} /></div>
+                    <div><Label>Teléfono</Label><Input name="telefono_hosting" defaultValue={editing?.telefono_hosting ?? ""} /></div>
+                    <div className="col-span-2 sm:col-span-3"><Label>Renovación</Label><Input type="date" name="fecha_renovacion_hosting" defaultValue={editing?.fecha_renovacion_hosting ?? ""} /></div>
+                  </div>
+                </fieldset>
+                <fieldset className="rounded-lg border border-border p-3 space-y-3">
+                  <legend className="text-xs font-semibold px-1">Base de datos & IA</legend>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><Label>Base de datos</Label><Input name="base_datos" defaultValue={editing?.base_datos ?? ""} placeholder="Supabase, Firebase..." /></div>
+                    <div><Label>Correo BD</Label><Input name="correo_bd" defaultValue={editing?.correo_bd ?? ""} /></div>
+                    <div><Label>IA usada</Label><Input name="ia_usada" defaultValue={editing?.ia_usada ?? ""} placeholder="Lovable, Claude..." /></div>
+                    <div><Label>Correo IA</Label><Input name="correo_ia" defaultValue={editing?.correo_ia ?? ""} /></div>
+                  </div>
+                </fieldset>
+                <div><Label>Notas</Label><Textarea name="notas" defaultValue={editing?.notas ?? ""} /></div>
+                <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-4 gap-3 mb-4">
+        <div className="rounded-xl border border-border bg-card p-4"><div className="text-xs text-muted-foreground">Total</div><div className="font-display text-2xl font-bold">{filtered.length}</div></div>
+        <div className="rounded-xl border border-border bg-card p-4"><div className="text-xs text-muted-foreground">Ingresos</div><div className="font-display text-2xl font-bold text-gradient">{formatCOP(total)}</div></div>
+        <div className="rounded-xl border border-border bg-card p-4"><div className="text-xs text-muted-foreground">Próx. renovación (≤30d)</div><div className="font-display text-2xl font-bold text-destructive">{proxRenov}</div></div>
+        <div className="rounded-xl border border-border bg-card p-4"><div className="text-xs text-muted-foreground">Estados</div><div className="font-display text-2xl font-bold">{estados.length}</div></div>
+      </div>
+
+      <div className="grid gap-3">
+        {filtered.map((p) => {
+          const dDom = daysUntil(p.fecha_renovacion_dominio);
+          const dHost = daysUntil(p.fecha_renovacion_hosting);
+          const warn = (dDom !== null && dDom <= 30) || (dHost !== null && dHost <= 30);
+          return (
+            <div key={p.id} className={`rounded-xl border bg-card p-4 ${warn ? "border-destructive/60" : "border-border"}`}>
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold">#{p.numero} · {p.cliente}</span>
+                    {p.tipo_pagina && <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{p.tipo_pagina}</span>}
+                    {p.estado_proyecto && <span className="text-xs px-2 py-0.5 rounded-full bg-secondary">{p.estado_proyecto}</span>}
+                    {p.estado_pagina && <span className="text-xs px-2 py-0.5 rounded-full bg-success/15 text-success">{p.estado_pagina}</span>}
+                  </div>
+                  {p.dominio && <a href={`https://${p.dominio}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">{p.dominio}</a>}
+                  <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground mt-2">
+                    <div><strong>Dom.:</strong> {p.proveedor_dominio ?? "—"} · {p.fecha_renovacion_dominio ?? "sin fecha"} {dDom !== null && <span className={dDom <= 30 ? "text-destructive font-semibold" : ""}>({dDom}d)</span>}</div>
+                    <div><strong>Host.:</strong> {p.proveedor_hosting ?? "—"} · {p.fecha_renovacion_hosting ?? "sin fecha"} {dHost !== null && <span className={dHost <= 30 ? "text-destructive font-semibold" : ""}>({dHost}d)</span>}</div>
+                    <div><strong>BD:</strong> {p.base_datos ?? "—"}</div>
+                    <div><strong>IA:</strong> {p.ia_usada ?? "—"}</div>
+                    <div className="font-semibold text-foreground">{formatCOP(p.cotizacion_cop ?? 0)}</div>
+                  </div>
+                  {p.notas && <p className="text-xs text-muted-foreground mt-2 italic">{p.notas}</p>}
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Button size="icon" variant="outline" onClick={() => { setEditing(p); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="outline" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {filtered.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin proyectos.</p>}
+      </div>
+    </>
+  );
+}
+
+/* ======================= PATROCINADORES ======================= */
+function SponsorsAdmin() {
+  const [items, setItems] = useState<Sponsor[]>([]);
+  const [editing, setEditing] = useState<Sponsor | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("sponsor_gallery").select("*").order("orden");
+    setItems((data ?? []) as Sponsor[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      titulo: String(fd.get("titulo")),
+      descripcion: String(fd.get("descripcion") ?? "") || null,
+      imagen_url: String(fd.get("imagen_url") ?? "") || null,
+      link_url: String(fd.get("link_url") ?? "") || null,
+      orden: Number(fd.get("orden") ?? 0),
+      activo: fd.get("activo") === "on",
+    };
+    const { error } = editing
+      ? await supabase.from("sponsor_gallery").update(payload).eq("id", editing.id)
+      : await supabase.from("sponsor_gallery").insert(payload);
+    if (error) toast.error(error.message); else { toast.success("Guardado"); setOpen(false); setEditing(null); load(); }
+  };
+  const toggle = async (s: Sponsor) => {
+    await supabase.from("sponsor_gallery").update({ activo: !s.activo }).eq("id", s.id); load();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("¿Eliminar?")) return;
+    await supabase.from("sponsor_gallery").delete().eq("id", id); load();
+  };
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <p className="text-sm text-muted-foreground">Negocios patrocinados que aparecen en la home. Activa/desactiva con el switch.</p>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo proyecto vendido</Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[85vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} proyecto vendido</DialogTitle></DialogHeader>
+          <DialogTrigger asChild><Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo patrocinado</Button></DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} patrocinado</DialogTitle></DialogHeader>
             <form onSubmit={save} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Nombre del proyecto</Label><Input name="project_name" defaultValue={editing?.project_name} required /></div>
-                <div>
-                  <Label>Categoría</Label>
-                  <Input name="category" defaultValue={editing?.category} placeholder="Páginas Web, Impresiones, Tienda, Eventos..." required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Cliente</Label><Input name="client_name" defaultValue={editing?.client_name} required /></div>
-                <div><Label>Contacto (tel/email)</Label><Input name="client_contact" defaultValue={editing?.client_contact ?? ""} /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Dominio (opcional)</Label><Input name="domain" defaultValue={editing?.domain ?? ""} placeholder="micliente.com" /></div>
-                <div><Label>Precio COP</Label><Input type="number" name="price_cop" defaultValue={editing?.price_cop ?? 0} required /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Fecha de venta</Label><Input type="date" name="sold_at" defaultValue={editing?.sold_at?.slice(0, 10) ?? new Date().toISOString().slice(0, 10)} required /></div>
-                <div>
-                  <Label>Estado</Label>
-                  <select name="status" defaultValue={editing?.status ?? "activo"} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
-                    <option value="activo">Activo</option>
-                    <option value="entregado">Entregado</option>
-                    <option value="renovacion_pendiente">Renovación pendiente</option>
-                    <option value="cancelado">Cancelado</option>
-                  </select>
-                </div>
-              </div>
-              <div><Label>Notas / detalles</Label><Textarea name="notes" defaultValue={editing?.notes ?? ""} placeholder="Detalles del proyecto, requerimientos especiales..." /></div>
+              <div><Label>Título</Label><Input name="titulo" defaultValue={editing?.titulo} required /></div>
+              <div><Label>Descripción</Label><Textarea name="descripcion" defaultValue={editing?.descripcion ?? ""} /></div>
+              <div><Label>URL imagen</Label><Input name="imagen_url" defaultValue={editing?.imagen_url ?? ""} placeholder="https://..." /></div>
+              <div><Label>URL del negocio</Label><Input name="link_url" defaultValue={editing?.link_url ?? ""} placeholder="https://..." /></div>
+              <div><Label>Orden</Label><Input type="number" name="orden" defaultValue={editing?.orden ?? 0} /></div>
+              <div className="flex items-center justify-between"><Label>Activo</Label><Switch name="activo" defaultChecked={editing?.activo ?? true} /></div>
               <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
-
-      <div className="grid sm:grid-cols-3 gap-3 mb-4">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="text-xs text-muted-foreground">Total proyectos</div>
-          <div className="font-display text-2xl font-bold">{filtered.length}</div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="text-xs text-muted-foreground">Ingresos {filter !== "all" && `(${filter})`}</div>
-          <div className="font-display text-2xl font-bold text-gradient">{formatCOP(total)}</div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="text-xs text-muted-foreground">Categorías</div>
-          <div className="font-display text-2xl font-bold">{categories.length}</div>
-        </div>
-      </div>
-
-      <div className="grid gap-3">
-        {filtered.map((p) => (
-          <div key={p.id} className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+      <div className="grid sm:grid-cols-2 gap-3">
+        {items.map((s) => (
+          <div key={s.id} className="rounded-xl border border-border bg-card p-3 flex items-center gap-3">
+            {s.imagen_url && <img src={s.imagen_url} alt={s.titulo} className="h-16 w-16 object-cover rounded-lg" />}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold truncate">{p.project_name}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{p.category}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-secondary">{p.status}</span>
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Cliente: <strong>{p.client_name}</strong>
-                {p.client_contact && ` · ${p.client_contact}`}
-                {p.domain && <> · <a href={`https://${p.domain}`} target="_blank" rel="noreferrer" className="text-primary hover:underline">{p.domain}</a></>}
-                {" · "}{formatCOP(p.price_cop)} · {new Date(p.sold_at).toLocaleDateString()}
-              </div>
-              {p.notes && <p className="text-xs text-muted-foreground mt-1 italic line-clamp-2">{p.notes}</p>}
+              <div className="font-semibold truncate">{s.titulo}</div>
+              <div className="text-xs text-muted-foreground truncate">{s.link_url ?? "Sin link"} · #{s.orden}</div>
             </div>
-            <div className="flex gap-2">
-              <Button size="icon" variant="outline" onClick={() => { setEditing(p); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
-              <Button size="icon" variant="outline" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
-            </div>
+            <Switch checked={s.activo} onCheckedChange={() => toggle(s)} />
+            <Button size="icon" variant="outline" onClick={() => { setEditing(s); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
+            <Button size="icon" variant="outline" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4" /></Button>
           </div>
         ))}
-        {filtered.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin proyectos en esta categoría.</p>}
+        {items.length === 0 && <p className="text-muted-foreground text-sm text-center py-8 col-span-full">Sin patrocinados.</p>}
       </div>
     </>
+  );
+}
+
+/* ======================= POPUPS ======================= */
+function PopupsAdmin() {
+  const [items, setItems] = useState<Popup[]>([]);
+  const [editing, setEditing] = useState<Popup | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("promo_popups").select("*").order("created_at", { ascending: false });
+    setItems((data ?? []) as Popup[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      titulo: String(fd.get("titulo")),
+      mensaje: String(fd.get("mensaje") ?? "") || null,
+      codigo: String(fd.get("codigo") ?? "") || null,
+      imagen_url: String(fd.get("imagen_url") ?? "") || null,
+      cta_text: String(fd.get("cta_text") ?? "") || null,
+      cta_url: String(fd.get("cta_url") ?? "") || null,
+      frecuencia: String(fd.get("frecuencia") ?? "session"),
+      fecha_inicio: String(fd.get("fecha_inicio") ?? "") || null,
+      fecha_fin: String(fd.get("fecha_fin") ?? "") || null,
+      activo: fd.get("activo") === "on",
+    };
+    const { error } = editing
+      ? await supabase.from("promo_popups").update(payload).eq("id", editing.id)
+      : await supabase.from("promo_popups").insert(payload);
+    if (error) toast.error(error.message); else { toast.success("Guardado"); setOpen(false); setEditing(null); load(); }
+  };
+  const toggle = async (p: Popup) => { await supabase.from("promo_popups").update({ activo: !p.activo }).eq("id", p.id); load(); };
+  const remove = async (id: string) => { if (!confirm("¿Eliminar?")) return; await supabase.from("promo_popups").delete().eq("id", id); load(); };
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <p className="text-sm text-muted-foreground">Ventanas emergentes para promociones, códigos de descuento o avisos.</p>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+          <DialogTrigger asChild><Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo popup</Button></DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} popup</DialogTitle></DialogHeader>
+            <form onSubmit={save} className="space-y-3">
+              <div><Label>Título</Label><Input name="titulo" defaultValue={editing?.titulo} required /></div>
+              <div><Label>Mensaje</Label><Textarea name="mensaje" defaultValue={editing?.mensaje ?? ""} placeholder="Compra una página web y recibe 1 cámara de seguridad gratis" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Código (opcional)</Label><Input name="codigo" defaultValue={editing?.codigo ?? ""} placeholder="TUUWEB20" /></div>
+                <div>
+                  <Label>Frecuencia</Label>
+                  <select name="frecuencia" defaultValue={editing?.frecuencia ?? "session"} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
+                    <option value="session">Una vez por sesión</option>
+                    <option value="always">Siempre</option>
+                  </select>
+                </div>
+              </div>
+              <div><Label>Imagen URL</Label><Input name="imagen_url" defaultValue={editing?.imagen_url ?? ""} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Texto botón</Label><Input name="cta_text" defaultValue={editing?.cta_text ?? "Cotizar por WhatsApp"} /></div>
+                <div><Label>URL botón</Label><Input name="cta_url" defaultValue={editing?.cta_url ?? ""} placeholder="https://wa.me/573332732672" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Inicio</Label><Input type="datetime-local" name="fecha_inicio" defaultValue={editing?.fecha_inicio?.slice(0, 16) ?? ""} /></div>
+                <div><Label>Fin</Label><Input type="datetime-local" name="fecha_fin" defaultValue={editing?.fecha_fin?.slice(0, 16) ?? ""} /></div>
+              </div>
+              <div className="flex items-center justify-between"><Label>Activo</Label><Switch name="activo" defaultChecked={editing?.activo ?? true} /></div>
+              <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="grid gap-3">
+        {items.map((p) => (
+          <div key={p.id} className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold truncate">{p.titulo} {p.codigo && <span className="text-xs px-2 py-0.5 rounded bg-brand-orange/10 text-brand-orange font-mono ml-2">{p.codigo}</span>}</div>
+              <div className="text-xs text-muted-foreground line-clamp-1">{p.mensaje}</div>
+              <div className="text-xs text-muted-foreground mt-1">Frecuencia: {p.frecuencia} · {p.activo ? "Activo" : "Pausado"}</div>
+            </div>
+            <Switch checked={p.activo} onCheckedChange={() => toggle(p)} />
+            <Button size="icon" variant="outline" onClick={() => { setEditing(p); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
+            <Button size="icon" variant="outline" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin popups.</p>}
+      </div>
+    </>
+  );
+}
+
+/* ======================= TEXTOS DEL SITIO ======================= */
+const DEFAULT_KEYS: Array<{ key: string; label: string; placeholder: string }> = [
+  { key: "home_title", label: "Título principal", placeholder: "TuuWeb" },
+  { key: "home_subtitle", label: "Subtítulo principal", placeholder: "Soluciones digitales y físicas" },
+  { key: "tienda_title", label: "Título de tienda", placeholder: "Anuncios, electrónicos y más" },
+  { key: "directorio_title", label: "Título de directorio", placeholder: "Negocios de Confianza" },
+  { key: "why_title", label: "Título sección '¿Por qué TuuWeb?'", placeholder: "¿Por qué TuuWeb?" },
+  { key: "cta_title", label: "Título CTA final", placeholder: "¿Listo para potenciar tu marca?" },
+];
+
+function SiteContentAdmin() {
+  const [items, setItems] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const { data } = await supabase.from("site_content").select("*");
+    const map: Record<string, string> = {};
+    (data as SiteContent[] | null)?.forEach((r) => { map[r.key] = r.value ?? ""; });
+    setItems(map); setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const saveOne = async (key: string, value: string) => {
+    const { error } = await supabase.from("site_content").upsert({ key, value }, { onConflict: "key" });
+    if (error) toast.error(error.message); else toast.success("Guardado");
+  };
+
+  if (loading) return <p className="text-muted-foreground text-sm">Cargando...</p>;
+
+  return (
+    <div className="space-y-3 max-w-2xl">
+      <p className="text-sm text-muted-foreground">Edita los textos clave del sitio. Los cambios se reflejan en la web pública.</p>
+      {DEFAULT_KEYS.map((k) => (
+        <div key={k.key} className="rounded-xl border border-border bg-card p-4">
+          <Label>{k.label}</Label>
+          <div className="flex gap-2 mt-1">
+            <Input
+              defaultValue={items[k.key] ?? ""}
+              placeholder={k.placeholder}
+              onBlur={(e) => e.target.value !== (items[k.key] ?? "") && saveOne(k.key, e.target.value)}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">clave: <code>{k.key}</code></p>
+        </div>
+      ))}
+    </div>
   );
 }
 
