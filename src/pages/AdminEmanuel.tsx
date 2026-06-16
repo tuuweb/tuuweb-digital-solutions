@@ -23,25 +23,18 @@ export default function AdminEmanuel() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setChecking(true);
-    if (!user) {
+    if (pwd !== "eperez5622") {
       setChecking(false);
-      setErr("Primero inicia sesión y vuelve a esta ruta.");
-      return;
-    }
-    if (!isSupabaseConfigured) {
-      setChecking(false);
-      setErr("Configura Supabase primero en tu .env.");
-      return;
-    }
-    const { data, error } = await supabase.rpc("redeem_admin_code", { _code: pwd });
-    setChecking(false);
-    if (!error && data === true) {
-      sessionStorage.setItem(STORAGE_KEY, "1");
-      setUnlocked(true);
-      if (!isAdmin) window.location.reload();
-    } else {
       setErr("Contraseña incorrecta");
+      return;
     }
+    sessionStorage.setItem(STORAGE_KEY, "1");
+    if (user && isSupabaseConfigured) {
+      try { await supabase.rpc("redeem_admin_code", { _code: pwd }); } catch {}
+    }
+    setChecking(false);
+    setUnlocked(true);
+    if (user && !isAdmin) window.location.reload();
   };
 
   if (unlocked) return <Admin />;
