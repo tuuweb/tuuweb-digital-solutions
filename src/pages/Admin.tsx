@@ -11,15 +11,25 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
 interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; }
 interface Rec { id: string; business_name: string; category: string; description: string; website_url: string | null; logo_url: string | null; is_coming_soon: boolean; }
-interface SoldProject { id: string; project_name: string; category: string; client_name: string; client_contact: string | null; domain: string | null; price_cop: number; sold_at: string; notes: string | null; status: string; }
+interface SoldProject {
+  id: string; numero: number | null; cliente: string; dominio: string | null; tipo_pagina: string | null;
+  estado_proyecto: string | null; estado_pagina: string | null; cotizacion_cop: number | null;
+  proveedor_dominio: string | null; correo_dominio: string | null; fecha_renovacion_dominio: string | null;
+  proveedor_hosting: string | null; correo_hosting: string | null; telefono_hosting: string | null; fecha_renovacion_hosting: string | null;
+  base_datos: string | null; correo_bd: string | null; ia_usada: string | null; correo_ia: string | null; notas: string | null;
+}
 interface Brand { id: string; name: string; logo_url: string; website_url: string | null; sort_order: number; is_active: boolean; }
 interface HeroSlide { id: string; title: string; subtitle: string | null; image_url: string; cta_label: string | null; cta_link: string | null; sort_order: number; is_active: boolean; }
 interface SupportMsg { id: string; name: string; email: string; phone: string | null; topic: string | null; message: string; status: string; created_at: string; }
+interface Sponsor { id: string; titulo: string; descripcion: string | null; imagen_url: string | null; link_url: string | null; activo: boolean; orden: number; }
+interface Popup { id: string; titulo: string; mensaje: string | null; codigo: string | null; imagen_url: string | null; cta_text: string | null; cta_url: string | null; activo: boolean; frecuencia: string; fecha_inicio: string | null; fecha_fin: string | null; }
+interface SiteContent { key: string; value: string | null; }
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
