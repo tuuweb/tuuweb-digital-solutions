@@ -35,7 +35,7 @@ export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
 
   if (loading) return <div className="container mx-auto px-4 py-20 text-center">Cargando...</div>;
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/admin-emanuel" replace />;
   if (!isAdmin) return (
     <div className="container mx-auto px-4 py-20 text-center">
       <ShieldAlert className="h-12 w-12 text-destructive mx-auto mb-4" />
