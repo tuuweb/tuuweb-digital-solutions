@@ -11,7 +11,7 @@ import ServiciosWeb from "@/pages/ServiciosWeb";
 import Impresiones from "@/pages/Impresiones";
 import Tienda from "@/pages/Tienda";
 import Directorio from "@/pages/Directorio";
-import Auth from "@/pages/Auth";
+
 import AdminEmanuel from "@/pages/AdminEmanuel";
 import NotFound from "@/pages/NotFound";
 
@@ -26,7 +26,7 @@ function AppRoutes() {
         <Route path="/impresiones" element={<Impresiones />} />
         <Route path="/tienda" element={<Tienda />} />
         <Route path="/directorio" element={<Directorio />} />
-        <Route path="/auth" element={<Auth />} />
+        
         <Route path="/admin-emanuel" element={<AdminEmanuel />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
