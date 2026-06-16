@@ -254,47 +254,179 @@ export type Database = {
         }
         Relationships: []
       }
-      sold_projects: {
+      promo_popups: {
         Row: {
-          category: string
-          client_contact: string | null
-          client_name: string
+          activo: boolean
+          codigo: string | null
           created_at: string
-          domain: string | null
+          cta_text: string | null
+          cta_url: string | null
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          frecuencia: string
           id: string
-          notes: string | null
-          price_cop: number
-          project_name: string
-          sold_at: string
-          status: string
+          imagen_url: string | null
+          mensaje: string | null
+          titulo: string
           updated_at: string
         }
         Insert: {
-          category: string
-          client_contact?: string | null
-          client_name: string
+          activo?: boolean
+          codigo?: string | null
           created_at?: string
-          domain?: string | null
+          cta_text?: string | null
+          cta_url?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          frecuencia?: string
           id?: string
-          notes?: string | null
-          price_cop?: number
-          project_name: string
-          sold_at?: string
-          status?: string
+          imagen_url?: string | null
+          mensaje?: string | null
+          titulo: string
           updated_at?: string
         }
         Update: {
-          category?: string
-          client_contact?: string | null
-          client_name?: string
+          activo?: boolean
+          codigo?: string | null
           created_at?: string
-          domain?: string | null
+          cta_text?: string | null
+          cta_url?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          frecuencia?: string
           id?: string
-          notes?: string | null
-          price_cop?: number
-          project_name?: string
-          sold_at?: string
-          status?: string
+          imagen_url?: string | null
+          mensaje?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
+      sold_projects: {
+        Row: {
+          base_datos: string | null
+          cliente: string
+          correo_bd: string | null
+          correo_dominio: string | null
+          correo_hosting: string | null
+          correo_ia: string | null
+          cotizacion_cop: number | null
+          created_at: string
+          dominio: string | null
+          estado_pagina: string | null
+          estado_proyecto: string | null
+          fecha_renovacion_dominio: string | null
+          fecha_renovacion_hosting: string | null
+          ia_usada: string | null
+          id: string
+          notas: string | null
+          numero: number | null
+          proveedor_dominio: string | null
+          proveedor_hosting: string | null
+          telefono_hosting: string | null
+          tipo_pagina: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_datos?: string | null
+          cliente: string
+          correo_bd?: string | null
+          correo_dominio?: string | null
+          correo_hosting?: string | null
+          correo_ia?: string | null
+          cotizacion_cop?: number | null
+          created_at?: string
+          dominio?: string | null
+          estado_pagina?: string | null
+          estado_proyecto?: string | null
+          fecha_renovacion_dominio?: string | null
+          fecha_renovacion_hosting?: string | null
+          ia_usada?: string | null
+          id?: string
+          notas?: string | null
+          numero?: number | null
+          proveedor_dominio?: string | null
+          proveedor_hosting?: string | null
+          telefono_hosting?: string | null
+          tipo_pagina?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_datos?: string | null
+          cliente?: string
+          correo_bd?: string | null
+          correo_dominio?: string | null
+          correo_hosting?: string | null
+          correo_ia?: string | null
+          cotizacion_cop?: number | null
+          created_at?: string
+          dominio?: string | null
+          estado_pagina?: string | null
+          estado_proyecto?: string | null
+          fecha_renovacion_dominio?: string | null
+          fecha_renovacion_hosting?: string | null
+          ia_usada?: string | null
+          id?: string
+          notas?: string | null
+          numero?: number | null
+          proveedor_dominio?: string | null
+          proveedor_hosting?: string | null
+          telefono_hosting?: string | null
+          tipo_pagina?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sponsor_gallery: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string | null
+          id: string
+          imagen_url: string | null
+          link_url: string | null
+          orden: number
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          imagen_url?: string | null
+          link_url?: string | null
+          orden?: number
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          imagen_url?: string | null
+          link_url?: string | null
+          orden?: number
+          titulo?: string
           updated_at?: string
         }
         Relationships: []
