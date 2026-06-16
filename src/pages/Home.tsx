@@ -26,8 +26,14 @@ const sectionPreviews: PokerCard[] = [
 export default function Home() {
   return (
     <>
+      {/* POPUP PROMOCIONAL */}
+      <PromoPopup />
+
       {/* CARRUSEL PRINCIPAL */}
       <HeroCarousel />
+
+      {/* GALERÍA DE PATROCINADOS (se oculta si no hay activos) */}
+      <SponsorGallery />
 
       {/* BUSCADOR + CATEGORÍAS */}
       <HomeSearch />
