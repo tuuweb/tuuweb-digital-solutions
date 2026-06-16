@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase, formatCOP, isSupabaseConfigured } from "@/lib/supabase";
 import techImg from "@/assets/tech-products.jpg";
 import { waLink } from "@/lib/contact";
+import { ProductQuoteDialog, type QuoteItem } from "@/components/ProductQuoteDialog";
 
 interface Product {
   id: string; name: string; description: string;
