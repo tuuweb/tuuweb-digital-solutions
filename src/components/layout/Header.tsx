@@ -1,14 +1,9 @@
 import { Link, NavLink } from "react-router-dom";
-import { Moon, Sun, User as UserIcon, LogOut, Shield, Menu, LogIn, ShoppingCart, PackageSearch } from "lucide-react";
+import { Moon, Sun, Menu, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.png";
+import { waLink } from "@/lib/contact";
 
 const links = [
   { to: "/servicios-web", label: "Servicios Web" },
@@ -19,7 +14,6 @@ const links = [
 
 export function Header() {
   const { theme, setTheme } = useTheme();
-  const { user, profile, signOut, isAdmin } = useAuth();
   const [mobile, setMobile] = useState(false);
 
   return (
@@ -64,36 +58,19 @@ export function Header() {
                 aria-label="Modo oscuro"><Moon className="h-3.5 w-3.5" /></button>
             </div>
 
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="sm" className="gap-2 hidden sm:inline-flex bg-white text-brand-orange hover:bg-white/90 h-8">
-                    <UserIcon className="h-4 w-4" />
-                    <span className="truncate max-w-[100px]">{profile?.full_name ?? user.email}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuItem asChild><Link to="/admin-emanuel"><Shield className="h-4 w-4 mr-2" />Panel admin</Link></DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem asChild><Link to="/mi-cuenta"><ShoppingCart className="h-4 w-4 mr-2" />Mi cuenta</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link to="/mi-cuenta"><PackageSearch className="h-4 w-4 mr-2" />Rastreo / historial</Link></DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" />Cerrar sesión</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button asChild size="sm" className="hidden sm:inline-flex bg-white text-brand-orange hover:bg-white/90 h-8 gap-2 font-semibold">
-                <Link to="/auth"><LogIn className="h-4 w-4" />Iniciar sesión</Link>
-              </Button>
-            )}
+            <a
+              href={waLink("Hola TuuWeb, quiero información")}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 h-8 px-3 rounded-lg bg-white text-brand-orange hover:bg-white/90 text-sm font-semibold transition-smooth"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Cotizar
+            </a>
 
-            <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/15 h-8 w-8" onClick={() => setMobile(!mobile)} aria-label="Menú">
+            <button className="md:hidden text-white hover:bg-white/15 h-8 w-8 rounded-lg flex items-center justify-center" onClick={() => setMobile(!mobile)} aria-label="Menú">
               <Menu className="h-5 w-5" />
-            </Button>
+            </button>
           </div>
         </div>
 
@@ -114,17 +91,15 @@ export function Header() {
                   {l.label}
                 </NavLink>
               ))}
-              {!user ? (
-                <Link to="/auth" onClick={() => setMobile(false)}
-                  className="mt-2 px-3 py-2 rounded-lg text-sm font-semibold bg-white text-brand-orange text-center">
-                  Iniciar sesión
-                </Link>
-              ) : (
-                <Link to="/mi-cuenta" onClick={() => setMobile(false)}
-                  className="mt-2 px-3 py-2 rounded-lg text-sm font-semibold bg-white text-brand-orange text-center">
-                  Mi cuenta
-                </Link>
-              )}
+              <a
+                href={waLink("Hola TuuWeb, quiero información")}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobile(false)}
+                className="mt-2 px-3 py-2 rounded-lg text-sm font-semibold bg-white text-brand-orange text-center inline-flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="h-4 w-4" /> Cotizar por WhatsApp
+              </a>
             </nav>
           </div>
         )}
