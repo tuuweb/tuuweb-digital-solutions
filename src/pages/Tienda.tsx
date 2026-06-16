@@ -115,6 +115,7 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
           </div>
         </div>
       )}
+      <ProductQuoteDialog item={quoteItem} open={!!quoteItem} onOpenChange={(o) => !o && setQuoteItem(null)} />
     </div>
   );
 }
