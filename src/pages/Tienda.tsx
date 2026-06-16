@@ -21,6 +21,7 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("asc");
+  const [quoteItem, setQuoteItem] = useState<QuoteItem | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) { setLoading(false); return; }
