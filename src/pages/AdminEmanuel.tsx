@@ -39,24 +39,7 @@ export default function AdminEmanuel() {
       return;
     }
 
-    // 1) Intento login
-    let { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pwd });
-
-    // 2) Si no existe, lo creo (solo funciona la primera vez)
-    if (signInErr) {
-      const { error: signUpErr } = await supabase.auth.signUp({
-        email,
-        password: pwd,
-        options: { data: { full_name: "Emanuel Admin" } },
-      });
-      if (signUpErr && !signUpErr.message.toLowerCase().includes("already")) {
-        setErr(signUpErr.message);
-        setBusy(false);
-        return;
-      }
-      const retry = await supabase.auth.signInWithPassword({ email, password: pwd });
-      signInErr = retry.error;
-    }
+    const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pwd });
 
     if (signInErr) {
       setErr(signInErr.message);
@@ -64,7 +47,6 @@ export default function AdminEmanuel() {
       return;
     }
 
-    // 3) Reclamar rol admin
     try {
       await supabase.rpc("redeem_admin_code", { _code: pwd });
     } catch {}
