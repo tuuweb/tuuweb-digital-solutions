@@ -49,7 +49,7 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex rounded-full bg-white/15 p-0.5 border border-white/20">
+            <div className="flex rounded-full bg-white/15 p-0.5 border border-white/20">
               <button type="button" onClick={() => setTheme("light")}
                 className={`h-7 w-7 rounded-full flex items-center justify-center transition-smooth ${theme === "light" ? "bg-white text-brand-orange" : "text-white hover:bg-white/10"}`}
                 aria-label="Modo claro"><Sun className="h-3.5 w-3.5" /></button>

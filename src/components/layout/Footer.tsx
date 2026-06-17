@@ -25,31 +25,31 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <h4 className="font-semibold mb-3 text-sm">Servicios</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/servicios-web" className="hover:text-primary">Páginas Web</Link></li>
-            <li><Link to="/impresiones" className="hover:text-primary">Impresiones</Link></li>
-            <li><Link to="/tienda" className="hover:text-primary">Tienda</Link></li>
-            <li><Link to="/directorio" className="hover:text-primary">Negocios de Confianza</Link></li>
+          <h4 className="font-semibold mb-3 text-sm text-white">Servicios</h4>
+          <ul className="space-y-2 text-sm text-white/85">
+            <li><Link to="/servicios-web" className="hover:text-white">Páginas Web</Link></li>
+            <li><Link to="/impresiones" className="hover:text-white">Impresiones</Link></li>
+            <li><Link to="/tienda" className="hover:text-white">Tienda</Link></li>
+            <li><Link to="/directorio" className="hover:text-white">Negocios de Confianza</Link></li>
           </ul>
         </div>
         <div>
-          <h4 className="font-semibold mb-3 text-sm">Contacto</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+          <h4 className="font-semibold mb-3 text-sm text-white">Contacto</h4>
+          <ul className="space-y-2 text-sm text-white/85">
             <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> {WHATSAPP_DISPLAY}</li>
             <li className="flex items-center gap-2"><Instagram className="h-4 w-4" /> {INSTAGRAM_HANDLE}</li>
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${EMAIL}`} className="hover:text-primary">{EMAIL}</a></li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${EMAIL}`} className="hover:text-white underline-offset-2 hover:underline">{EMAIL}</a></li>
             <li>Colombia</li>
           </ul>
         </div>
         <div>
-          <h4 className="font-semibold mb-3 text-sm">Legal</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+          <h4 className="font-semibold mb-3 text-sm text-white">Legal</h4>
+          <ul className="space-y-2 text-sm text-white/85">
             <li>Términos</li><li>Privacidad</li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-border/50 py-4 text-center text-xs text-muted-foreground">
+      <div className="border-t border-white/25 py-4 text-center text-xs text-white/85">
         © {new Date().getFullYear()} TuuWeb.com — Todos los derechos reservados
       </div>
     </footer>
