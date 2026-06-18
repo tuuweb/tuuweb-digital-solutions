@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import Admin from "./Admin";
 
 const ADMIN_EMAIL = "emanueldavxd@gmail.com";
-const ADMIN_PASSWORD = "55249964paola";
 
 export default function AdminEmanuel() {
   const { user, isAdmin, loading } = useAuth();
@@ -33,26 +32,23 @@ export default function AdminEmanuel() {
       return;
     }
 
-    if (email !== ADMIN_EMAIL || pwd !== ADMIN_PASSWORD) {
-      setErr("Credenciales incorrectas");
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (cleanEmail !== ADMIN_EMAIL) {
+      setErr("Este panel solo acepta el correo privado del administrador.");
       setBusy(false);
       return;
     }
 
-    const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pwd });
+    const { error: signInErr } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: pwd });
 
     if (signInErr) {
-      setErr(signInErr.message);
+      setErr("Correo o contraseña incorrectos.");
       setBusy(false);
       return;
     }
 
-    try {
-      await supabase.rpc("redeem_admin_code", { _code: pwd });
-    } catch {}
-
     setBusy(false);
-    // Recarga para que AuthContext reciba el nuevo rol
     window.location.reload();
   };
 
