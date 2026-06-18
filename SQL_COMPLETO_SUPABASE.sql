@@ -39,9 +39,12 @@ CREATE POLICY "users see own roles" ON public.user_roles FOR SELECT TO authentic
   USING (user_id = auth.uid());
 
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role public.app_role)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
-  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role)
+RETURNS boolean LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public AS $$
+  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role AND user_id = auth.uid())
 $$;
+REVOKE ALL ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.has_role(uuid, public.app_role) FROM anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO authenticated;
 
 -- 3) Perfiles + trigger handle_new_user
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -138,8 +141,8 @@ GRANT INSERT, UPDATE, DELETE ON public.sponsor_gallery TO authenticated;
 GRANT ALL ON public.sponsor_gallery TO service_role;
 ALTER TABLE public.sponsor_gallery ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "public read active sponsors" ON public.sponsor_gallery;
-CREATE POLICY "public read active sponsors" ON public.sponsor_gallery FOR SELECT
-  USING (activo = true OR public.has_role(auth.uid(),'admin'));
+CREATE POLICY "public read active sponsors" ON public.sponsor_gallery FOR SELECT TO anon, authenticated
+  USING (activo = true);
 DROP POLICY IF EXISTS "admin manage sponsors" ON public.sponsor_gallery;
 CREATE POLICY "admin manage sponsors" ON public.sponsor_gallery FOR ALL TO authenticated
   USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
@@ -168,8 +171,8 @@ GRANT INSERT, UPDATE, DELETE ON public.promo_popups TO authenticated;
 GRANT ALL ON public.promo_popups TO service_role;
 ALTER TABLE public.promo_popups ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "public read active popups" ON public.promo_popups;
-CREATE POLICY "public read active popups" ON public.promo_popups FOR SELECT
-  USING (activo = true OR public.has_role(auth.uid(),'admin'));
+CREATE POLICY "public read active popups" ON public.promo_popups FOR SELECT TO anon, authenticated
+  USING (activo = true);
 DROP POLICY IF EXISTS "admin manage popups" ON public.promo_popups;
 CREATE POLICY "admin manage popups" ON public.promo_popups FOR ALL TO authenticated
   USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
