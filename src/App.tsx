@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/layout/Layout";
 import { PageLoader } from "@/components/PageLoader";
 
@@ -16,8 +15,6 @@ import AdminEmanuel from "@/pages/AdminEmanuel";
 import NotFound from "@/pages/NotFound";
 
 function AppRoutes() {
-  const { loading } = useAuth();
-  if (loading) return <PageLoader />;
   return (
     <Layout>
       <Routes>
@@ -40,12 +37,10 @@ export default function App() {
   if (!mounted) return <PageLoader />;
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-          <Toaster richColors position="top-right" />
-        </BrowserRouter>
-      </AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+        <Toaster richColors position="top-right" />
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

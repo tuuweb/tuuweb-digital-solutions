@@ -580,6 +580,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_header_password_ok: { Args: never; Returns: boolean }
+      admin_password_ok: { Args: { _password: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

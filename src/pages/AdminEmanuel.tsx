@@ -1,59 +1,46 @@
-import { useState, useEffect } from "react";
-import { Lock, ShieldCheck, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Lock, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { getStoredAdminPassword, setAdminPassword } from "@/lib/adminSupabase";
 import Admin from "./Admin";
 
-const ADMIN_EMAIL = "emanueldavxd@gmail.com";
-
 export default function AdminEmanuel() {
-  const { user, isAdmin, loading } = useAuth();
-  const [email, setEmail] = useState(ADMIN_EMAIL);
   const [pwd, setPwd] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [ok, setOk] = useState(() => Boolean(getStoredAdminPassword()));
 
-  // Si ya está autenticado como admin, render directo
   useEffect(() => {
-    if (user && isAdmin) return;
-  }, [user, isAdmin]);
+    const saved = getStoredAdminPassword();
+    if (!saved) return;
+
+    (supabase.rpc as any)("admin_password_ok", { _password: saved }).then(({ data }: { data: boolean | null }) => {
+      if (!data) setOk(false);
+    });
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
     setBusy(true);
 
-    if (!isSupabaseConfigured) {
-      setErr("Backend no configurado.");
-      setBusy(false);
-      return;
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (cleanEmail !== ADMIN_EMAIL) {
-      setErr("Este panel solo acepta el correo privado del administrador.");
-      setBusy(false);
-      return;
-    }
-
-    const { error: signInErr } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: pwd });
-
-    if (signInErr) {
-      setErr("Correo o contraseña incorrectos.");
-      setBusy(false);
-      return;
-    }
+    const password = pwd.trim();
+    const { data, error } = await (supabase.rpc as any)("admin_password_ok", { _password: password });
 
     setBusy(false);
-    window.location.reload();
+    if (error || !data) {
+      setErr("Contraseña incorrecta.");
+      return;
+    }
+
+    setAdminPassword(password);
+    setOk(true);
   };
 
-  if (loading) return <div className="container mx-auto py-20 text-center text-muted-foreground">Cargando...</div>;
-  if (user && isAdmin) return <Admin />;
+  if (ok) return <Admin />;
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -64,16 +51,19 @@ export default function AdminEmanuel() {
               <ShieldCheck className="h-8 w-8 text-primary-foreground" />
             </div>
             <h1 className="font-display text-2xl font-bold">Panel <span className="text-gradient">Admin</span></h1>
-            <p className="text-sm text-muted-foreground mt-2">Acceso restringido</p>
+            <p className="text-sm text-muted-foreground mt-2">Acceso privado</p>
           </div>
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <Label className="flex items-center gap-2"><Mail className="h-3.5 w-3.5" /> Correo</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 mt-1" required />
-            </div>
-            <div>
               <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5" /> Contraseña</Label>
-              <Input type="password" value={pwd} onChange={(e) => { setPwd(e.target.value); setErr(""); }} autoFocus className="h-11 mt-1" required />
+              <Input
+                type="password"
+                value={pwd}
+                onChange={(e) => { setPwd(e.target.value); setErr(""); }}
+                autoFocus
+                className="h-11 mt-1"
+                required
+              />
               {err && <p className="text-destructive text-xs mt-2">{err}</p>}
             </div>
             <Button type="submit" disabled={busy} className="w-full h-11 bg-gradient-primary text-primary-foreground">

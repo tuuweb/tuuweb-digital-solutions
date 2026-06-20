@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase, formatCOP } from "@/lib/supabase";
+import { adminSupabase as supabase, clearAdminPassword } from "@/lib/adminSupabase";
+import { formatCOP } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +10,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, ShieldAlert, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -32,22 +31,22 @@ interface Popup { id: string; titulo: string; mensaje: string | null; codigo: st
 interface SiteContent { key: string; value: string | null; }
 
 export default function Admin() {
-  const { user, isAdmin, loading } = useAuth();
-
-  if (loading) return <div className="container mx-auto px-4 py-20 text-center">Cargando...</div>;
-  if (!user) return <Navigate to="/admin-emanuel" replace />;
-  if (!isAdmin) return (
-    <div className="container mx-auto px-4 py-20 text-center">
-      <ShieldAlert className="h-12 w-12 text-destructive mx-auto mb-4" />
-      <h1 className="font-display text-2xl font-bold">Acceso restringido</h1>
-      <p className="text-muted-foreground mt-2">Esta sección es solo para administradores.</p>
-    </div>
-  );
+  const logout = () => {
+    clearAdminPassword();
+    window.location.reload();
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Panel <span className="text-gradient">Admin</span></h1>
-      <p className="text-muted-foreground mb-8">Gestiona productos, directorio, proyectos vendidos y marcas aliadas.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-8">
+        <div>
+          <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Panel <span className="text-gradient">Admin</span></h1>
+          <p className="text-muted-foreground">Gestiona productos, directorio, proyectos vendidos y marcas aliadas.</p>
+        </div>
+        <Button type="button" variant="outline" onClick={logout} className="gap-2">
+          <LogOut className="h-4 w-4" /> Salir
+        </Button>
+      </div>
 
       <Tabs defaultValue="sold">
         <TabsList className="flex-wrap h-auto">
