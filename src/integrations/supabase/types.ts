@@ -586,6 +586,7 @@ export type Database = {
         Args: { _id: string; _password: string; _table: string }
         Returns: boolean
       }
+      admin_header_password_ok: { Args: never; Returns: boolean }
       admin_insert_row: {
         Args: { _password: string; _payload: Json; _table: string }
         Returns: Json
