@@ -17,7 +17,7 @@ export default function AdminEmanuel() {
     const saved = getStoredAdminPassword();
     if (!saved) return;
 
-    supabase.rpc("admin_password_ok", { _password: saved }).then(({ data }) => {
+    (supabase.rpc as any)("admin_password_ok", { _password: saved }).then(({ data }: { data: boolean | null }) => {
       if (!data) setOk(false);
     });
   }, []);
@@ -28,7 +28,7 @@ export default function AdminEmanuel() {
     setBusy(true);
 
     const password = pwd.trim();
-    const { data, error } = await supabase.rpc("admin_password_ok", { _password: password });
+    const { data, error } = await (supabase.rpc as any)("admin_password_ok", { _password: password });
 
     setBusy(false);
     if (error || !data) {
