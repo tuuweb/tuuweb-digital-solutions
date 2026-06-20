@@ -580,6 +580,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_allowed_table: { Args: { _table: string }; Returns: boolean }
+      admin_assert_password: { Args: { _password: string }; Returns: undefined }
+      admin_delete_row: {
+        Args: { _id: string; _password: string; _table: string }
+        Returns: boolean
+      }
+      admin_insert_row: {
+        Args: { _password: string; _payload: Json; _table: string }
+        Returns: Json
+      }
+      admin_password_ok: { Args: { _password: string }; Returns: boolean }
+      admin_read_table: {
+        Args: { _password: string; _table: string }
+        Returns: Json
+      }
+      admin_update_row: {
+        Args: { _id: string; _password: string; _payload: Json; _table: string }
+        Returns: Json
+      }
+      admin_upsert_site_content: {
+        Args: { _key: string; _password: string; _value: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
