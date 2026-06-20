@@ -196,74 +196,41 @@ DROP POLICY IF EXISTS "admin manage site_content" ON public.site_content;
 CREATE POLICY "admin manage site_content" ON public.site_content FOR ALL TO authenticated
   USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
 
--- 8) redeem_admin_code bloqueado (el admin entra solo con email + contraseña)
-CREATE OR REPLACE FUNCTION public.redeem_admin_code(_code text)
-RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $$
-DECLARE expected_hash text := '7439518ffdfb61a5b8095c3764217d0a24e31f74c70ebe0e204cc7d83adc1ea6';
-BEGIN
-  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Debes iniciar sesión primero'; END IF;
-  IF encode(digest(coalesce(_code,''),'sha256'),'hex') <> expected_hash THEN RETURN false; END IF;
-  INSERT INTO public.user_roles (user_id, role) VALUES (auth.uid(),'admin')
-  ON CONFLICT (user_id, role) DO NOTHING;
-  RETURN true;
-END; $$;
-REVOKE ALL ON FUNCTION public.redeem_admin_code(text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.redeem_admin_code(text) FROM anon;
-REVOKE ALL ON FUNCTION public.redeem_admin_code(text) FROM authenticated;
-GRANT EXECUTE ON FUNCTION public.redeem_admin_code(text) TO service_role;
+-- 8) Admin sin auth: /admin-emanuel usa solo contraseña, sin correo ni usuario.
+CREATE OR REPLACE FUNCTION public.admin_password_ok(_password text)
+RETURNS boolean LANGUAGE sql STABLE SECURITY INVOKER SET search_path TO 'public', 'extensions' AS $$
+  SELECT encode(digest(coalesce(_password, ''), 'sha256'), 'hex') = '7439518ffdfb61a5b8095c3764217d0a24e31f74c70ebe0e204cc7d83adc1ea6'
+$$;
 
--- 9) Crear / reparar el usuario admin directo
--- email: emanueldavxd@gmail.com
--- password: 55249964paola
-DO $$
-DECLARE
-  v_uid uuid;
-BEGIN
-  SELECT id INTO v_uid FROM auth.users WHERE lower(email) = lower('emanueldavxd@gmail.com') LIMIT 1;
+CREATE OR REPLACE FUNCTION public.admin_header_password_ok()
+RETURNS boolean LANGUAGE sql STABLE SECURITY INVOKER SET search_path TO 'public' AS $$
+  SELECT public.admin_password_ok(
+    coalesce(nullif(current_setting('request.headers', true), '')::jsonb ->> 'x-admin-password', '')
+  )
+$$;
 
-  IF v_uid IS NULL THEN
-    v_uid := gen_random_uuid();
-    INSERT INTO auth.users (
-      instance_id, id, aud, role, email, encrypted_password,
-      email_confirmed_at, recovery_sent_at, last_sign_in_at,
-      raw_app_meta_data, raw_user_meta_data,
-      created_at, updated_at,
-      confirmation_token, email_change, email_change_token_new,
-      recovery_token, phone_change, phone_change_token, email_change_token_current,
-      email_change_confirm_status, is_sso_user, is_anonymous
-    ) VALUES (
-      '00000000-0000-0000-0000-000000000000', v_uid, 'authenticated', 'authenticated',
-      'emanueldavxd@gmail.com', crypt('55249964paola', gen_salt('bf')),
-      now(), now(), now(),
-      '{"provider":"email","providers":["email"]}'::jsonb,
-      '{"full_name":"Emanuel Admin"}'::jsonb,
-      now(), now(), '', '', '', '', '', '', '', 0, false, false
-    );
+REVOKE ALL ON FUNCTION public.admin_password_ok(text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.admin_header_password_ok() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_password_ok(text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_header_password_ok() TO anon, authenticated;
 
-    INSERT INTO auth.identities (
-      id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
-    ) VALUES (
-      gen_random_uuid(), v_uid::text, v_uid,
-      jsonb_build_object('sub', v_uid::text, 'email', 'emanueldavxd@gmail.com', 'email_verified', true, 'phone_verified', false),
-      'email', now(), now(), now()
-    ) ON CONFLICT (provider_id, provider) DO NOTHING;
-  ELSE
-    UPDATE auth.users
-    SET encrypted_password = crypt('55249964paola', gen_salt('bf')),
-        email_confirmed_at = coalesce(email_confirmed_at, now()),
-        raw_app_meta_data = '{"provider":"email","providers":["email"]}'::jsonb,
-        updated_at = now()
-    WHERE id = v_uid;
-  END IF;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.sold_projects TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.sponsor_gallery TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.promo_popups TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.site_content TO anon, authenticated;
 
-  INSERT INTO public.profiles (id, email, full_name)
-  VALUES (v_uid, 'emanueldavxd@gmail.com', 'Emanuel Admin')
-  ON CONFLICT (id) DO UPDATE SET
-    email = excluded.email,
-    full_name = coalesce(public.profiles.full_name, excluded.full_name),
-    updated_at = now();
+DROP POLICY IF EXISTS "password admin all sold_projects" ON public.sold_projects;
+CREATE POLICY "password admin all sold_projects" ON public.sold_projects FOR ALL TO anon, authenticated
+  USING (public.admin_header_password_ok()) WITH CHECK (public.admin_header_password_ok());
 
-  INSERT INTO public.user_roles (user_id, role)
-  VALUES (v_uid, 'admin')
-  ON CONFLICT (user_id, role) DO NOTHING;
-END $$;
+DROP POLICY IF EXISTS "password admin all sponsor_gallery" ON public.sponsor_gallery;
+CREATE POLICY "password admin all sponsor_gallery" ON public.sponsor_gallery FOR ALL TO anon, authenticated
+  USING (public.admin_header_password_ok()) WITH CHECK (public.admin_header_password_ok());
+
+DROP POLICY IF EXISTS "password admin all promo_popups" ON public.promo_popups;
+CREATE POLICY "password admin all promo_popups" ON public.promo_popups FOR ALL TO anon, authenticated
+  USING (public.admin_header_password_ok()) WITH CHECK (public.admin_header_password_ok());
+
+DROP POLICY IF EXISTS "password admin all site_content" ON public.site_content;
+CREATE POLICY "password admin all site_content" ON public.site_content FOR ALL TO anon, authenticated
+  USING (public.admin_header_password_ok()) WITH CHECK (public.admin_header_password_ok());
