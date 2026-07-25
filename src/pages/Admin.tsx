@@ -53,6 +53,7 @@ export default function Admin() {
           <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Tracker proyectos</TabsTrigger>
           <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
+          <TabsTrigger value="showcase"><Sparkles className="h-4 w-4 mr-2" />Slider servicios</TabsTrigger>
           <TabsTrigger value="sponsors"><Star className="h-4 w-4 mr-2" />Patrocinados</TabsTrigger>
           <TabsTrigger value="popups"><Megaphone className="h-4 w-4 mr-2" />Popups</TabsTrigger>
           <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas</TabsTrigger>
@@ -63,6 +64,7 @@ export default function Admin() {
         <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
+        <TabsContent value="showcase" className="mt-6"><ShowcaseAdmin /></TabsContent>
         <TabsContent value="sponsors" className="mt-6"><SponsorsAdmin /></TabsContent>
         <TabsContent value="popups" className="mt-6"><PopupsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
