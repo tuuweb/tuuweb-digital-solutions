@@ -9,11 +9,11 @@ import { BrandsMarquee } from "@/components/BrandsMarquee";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeSearch } from "@/components/HomeSearch";
 import { PokerCardsCarousel, type PokerCard } from "@/components/PokerCardsCarousel";
+import { ShowcaseSlider } from "@/components/ShowcaseSlider";
 import { SupportForm } from "@/components/SupportForm";
 import { SponsorGallery } from "@/components/SponsorGallery";
 import { PromoPopup } from "@/components/PromoPopup";
 import { TiendaSection } from "@/pages/Tienda";
-import { DirectorioSection } from "@/pages/Directorio";
 import { waLink, INSTAGRAM_URL } from "@/lib/contact";
 
 const sectionPreviews: PokerCard[] = [
@@ -68,9 +68,9 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16">
         <div className="text-center max-w-2xl mx-auto mb-8">
           <h2 className="font-display text-3xl md:text-5xl font-bold">Todo lo que tu negocio necesita</h2>
-          <p className="text-muted-foreground mt-3">Desliza las cartas para descubrir cada sección.</p>
+          <p className="text-muted-foreground mt-3">Descubre cada solución con un solo desliz.</p>
         </div>
-        <PokerCardsCarousel items={sectionPreviews} />
+        <ShowcaseSlider />
       </section>
 
       {/* TIENDA EMBED */}
@@ -94,13 +94,13 @@ export default function Home() {
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Directorio</p>
             <h2 className="font-display text-3xl md:text-4xl font-bold mt-1">Negocios de Confianza <span className="text-gradient">por Categoría</span></h2>
-            <p className="text-muted-foreground mt-2 max-w-xl">Empresas verificadas y recomendadas por TuuWeb.</p>
+            <p className="text-muted-foreground mt-2 max-w-xl">Empresas verificadas y recomendadas por TuuWeb. Desliza para ver más.</p>
           </div>
           <Button asChild variant="outline">
             <Link to="/directorio">Ver todos <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
         </div>
-        <DirectorioSection limit={6} />
+        <PokerCardsCarousel items={sectionPreviews} />
       </section>
 
       {/* WHY */}

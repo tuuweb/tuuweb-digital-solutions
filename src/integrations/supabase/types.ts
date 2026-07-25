@@ -302,6 +302,54 @@ export type Database = {
         }
         Relationships: []
       }
+      showcase_slides: {
+        Row: {
+          accent: string | null
+          created_at: string
+          cta_label: string | null
+          cta_link: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          kicker: string | null
+          price_label: string | null
+          sort_order: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          accent?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          kicker?: string | null
+          price_label?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          accent?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          kicker?: string | null
+          price_label?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string

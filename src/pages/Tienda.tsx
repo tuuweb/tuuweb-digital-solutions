@@ -82,8 +82,10 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
               <motion.div key={p.id}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 onClick={() => setQuoteItem({ name: p.name, description: p.description, price_cop: p.price_cop, image: p.images?.[0] ?? techImg })}
-                className="shrink-0 w-[78%] sm:w-auto snap-center rounded-2xl border border-border bg-card overflow-hidden hover-lift cursor-pointer">
-                <img src={p.images?.[0] ?? techImg} alt={p.name} className="w-full h-48 object-cover" />
+                className="shrink-0 w-[78%] sm:w-auto snap-center rounded-2xl border border-border bg-card overflow-hidden hover-lift cursor-pointer flex flex-col">
+                <div className="w-full h-64 bg-muted flex items-center justify-center overflow-hidden">
+                  <img src={p.images?.[0] ?? techImg} alt={p.name} className="w-full h-full object-contain p-3" />
+                </div>
                 <div className="p-5">
                   <h3 className="font-semibold mb-1">{p.name}</h3>
                   <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{p.description}</p>

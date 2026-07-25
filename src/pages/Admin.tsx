@@ -53,6 +53,7 @@ export default function Admin() {
           <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Tracker proyectos</TabsTrigger>
           <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
+          <TabsTrigger value="showcase"><Sparkles className="h-4 w-4 mr-2" />Slider servicios</TabsTrigger>
           <TabsTrigger value="sponsors"><Star className="h-4 w-4 mr-2" />Patrocinados</TabsTrigger>
           <TabsTrigger value="popups"><Megaphone className="h-4 w-4 mr-2" />Popups</TabsTrigger>
           <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas</TabsTrigger>
@@ -63,6 +64,7 @@ export default function Admin() {
         <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
+        <TabsContent value="showcase" className="mt-6"><ShowcaseAdmin /></TabsContent>
         <TabsContent value="sponsors" className="mt-6"><SponsorsAdmin /></TabsContent>
         <TabsContent value="popups" className="mt-6"><PopupsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
@@ -879,6 +881,110 @@ function SupportMessagesAdmin() {
           </div>
         ))}
         {filtered.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin mensajes.</p>}
+      </div>
+    </>
+  );
+}
+
+/* ======================= SHOWCASE SLIDER (SERVICIOS) ======================= */
+interface ShowcaseRow { id: string; kicker: string | null; title: string; subtitle: string | null; image_url: string; price_label: string | null; cta_label: string | null; cta_link: string | null; accent: string | null; sort_order: number; is_active: boolean; }
+
+function ShowcaseAdmin() {
+  const [items, setItems] = useState<ShowcaseRow[]>([]);
+  const [editing, setEditing] = useState<ShowcaseRow | null>(null);
+  const [open, setOpen] = useState(false);
+  const [imgPreview, setImgPreview] = useState("");
+
+  const load = async () => {
+    const { data } = await supabase.from("showcase_slides").select("*").order("sort_order", { ascending: true });
+    setItems((data ?? []) as ShowcaseRow[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      kicker: String(fd.get("kicker") ?? "") || null,
+      title: String(fd.get("title")),
+      subtitle: String(fd.get("subtitle") ?? "") || null,
+      image_url: String(fd.get("image_url")),
+      price_label: String(fd.get("price_label") ?? "") || null,
+      cta_label: String(fd.get("cta_label") ?? "") || null,
+      cta_link: String(fd.get("cta_link") ?? "") || null,
+      accent: String(fd.get("accent") ?? "#ff7a1a") || "#ff7a1a",
+      sort_order: Number(fd.get("sort_order") ?? 0),
+      is_active: fd.get("is_active") === "on",
+    };
+    const { error } = editing
+      ? await supabase.from("showcase_slides").update(payload).eq("id", editing.id)
+      : await supabase.from("showcase_slides").insert(payload);
+    if (error) toast.error(error.message);
+    else { toast.success("Guardado"); setOpen(false); setEditing(null); setImgPreview(""); load(); }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("¿Eliminar slide?")) return;
+    const { error } = await supabase.from("showcase_slides").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Eliminado"); load(); }
+  };
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <p className="text-sm text-muted-foreground">Slides del bloque "Todo lo que tu negocio necesita". Edita títulos, imágenes, precios, color de acento y enlaces.</p>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setEditing(null); setImgPreview(""); } }}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo slide</Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} slide</DialogTitle></DialogHeader>
+            <form onSubmit={save} className="space-y-3">
+              <div><Label>Etiqueta superior (kicker)</Label><Input name="kicker" defaultValue={editing?.kicker ?? ""} placeholder="SERVICIOS WEB" /></div>
+              <div><Label>Título</Label><Input name="title" defaultValue={editing?.title} required /></div>
+              <div><Label>Subtítulo</Label><Textarea name="subtitle" defaultValue={editing?.subtitle ?? ""} rows={2} /></div>
+              <div>
+                <Label>URL de imagen</Label>
+                <Input name="image_url" defaultValue={editing?.image_url} onChange={(e) => setImgPreview(e.target.value)} required />
+                {(imgPreview || editing?.image_url) && (
+                  <img src={imgPreview || editing?.image_url} alt="preview" className="mt-2 rounded-lg border border-border max-h-40 object-cover w-full" />
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Etiqueta de precio</Label><Input name="price_label" defaultValue={editing?.price_label ?? ""} placeholder="Desde $350.000" /></div>
+                <div><Label>Color de acento</Label><Input type="color" name="accent" defaultValue={editing?.accent ?? "#ff7a1a"} className="h-10 p-1" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Texto del botón</Label><Input name="cta_label" defaultValue={editing?.cta_label ?? ""} placeholder="Ver más" /></div>
+                <div><Label>Enlace del botón</Label><Input name="cta_link" defaultValue={editing?.cta_link ?? ""} placeholder="/servicios-web" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Orden</Label><Input type="number" name="sort_order" defaultValue={editing?.sort_order ?? 0} /></div>
+                <div className="flex items-center justify-between mt-6"><Label>Activo</Label><Switch name="is_active" defaultChecked={editing?.is_active ?? true} /></div>
+              </div>
+              <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {items.map((s) => (
+          <div key={s.id} className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="relative">
+              <img src={s.image_url} alt={s.title} className="w-full h-32 object-cover" />
+              <span className="absolute top-2 left-2 h-4 w-4 rounded-full border-2 border-white shadow" style={{ background: s.accent ?? "#ff7a1a" }} />
+            </div>
+            <div className="p-4">
+              <div className="font-semibold">{s.title} <span className="text-xs text-muted-foreground">#{s.sort_order} {s.is_active ? "" : "· oculto"}</span></div>
+              <div className="text-xs text-muted-foreground line-clamp-2 mb-3">{s.subtitle}</div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => { setEditing(s); setImgPreview(s.image_url); setOpen(true); }}><Edit className="h-3.5 w-3.5 mr-1" />Editar</Button>
+                <Button size="sm" variant="outline" onClick={() => remove(s.id)}><Trash2 className="h-3.5 w-3.5 mr-1" />Borrar</Button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-muted-foreground text-sm text-center py-8 col-span-full">Sin slides. Se muestran los predeterminados.</p>}
       </div>
     </>
   );
