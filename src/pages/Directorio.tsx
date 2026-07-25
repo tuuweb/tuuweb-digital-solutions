@@ -75,22 +75,26 @@ export function DirectorioSection({ limit }: { limit?: number }) {
             <motion.div key={r.id}
               initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="rounded-2xl border border-border bg-card p-6 hover-lift">
+              className="rounded-2xl border border-border bg-card p-6 hover-lift flex flex-col">
               <div className="flex items-center gap-3 mb-3">
                 {r.logo_url
-                  ? <img src={r.logo_url} alt={r.business_name} className="h-12 w-12 rounded-xl object-cover" />
-                  : <div className="h-12 w-12 rounded-xl bg-gradient-primary" />}
-                <div>
-                  <h3 className="font-semibold">{r.business_name}</h3>
-                  <span className="text-xs text-muted-foreground">{r.category}</span>
+                  ? <img src={r.logo_url} alt={r.business_name} className="h-14 w-14 rounded-xl object-cover border border-border" />
+                  : <div className="h-14 w-14 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-lg">{r.business_name.charAt(0)}</div>}
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold truncate">{r.business_name}</h3>
+                  <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary mt-0.5">{r.category}</span>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{r.description}</p>
-              {r.website_url && (
-                <a href={r.website_url} target="_blank" rel="noreferrer"
-                  className="text-sm text-primary inline-flex items-center gap-1 hover:underline">
-                  Visitar sitio <ExternalLink className="h-3 w-3" />
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-1">{r.description}</p>
+              {r.website_url ? (
+                <a
+                  href={/^https?:\/\//i.test(r.website_url) ? r.website_url : `https://${r.website_url}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-gradient-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-smooth">
+                  Visitar sitio <ExternalLink className="h-3.5 w-3.5" />
                 </a>
+              ) : (
+                <span className="text-xs text-muted-foreground italic">Sin sitio web</span>
               )}
             </motion.div>
           ))}
