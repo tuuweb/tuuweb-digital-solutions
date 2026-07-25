@@ -14,7 +14,7 @@ import { SupportForm } from "@/components/SupportForm";
 import { SponsorGallery } from "@/components/SponsorGallery";
 import { PromoPopup } from "@/components/PromoPopup";
 import { TiendaSection } from "@/pages/Tienda";
-import { DirectorioSection } from "@/pages/Directorio";
+import { TiendaSection } from "@/pages/Tienda";
 import { waLink, INSTAGRAM_URL } from "@/lib/contact";
 
 const sectionPreviews: PokerCard[] = [
