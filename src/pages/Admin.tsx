@@ -887,17 +887,17 @@ function SupportMessagesAdmin() {
 }
 
 /* ======================= SHOWCASE SLIDER (SERVICIOS) ======================= */
-interface ShowcaseRow { id: string; kicker: string | null; title: string; subtitle: string | null; image_url: string; price_label: string | null; cta_label: string | null; cta_link: string | null; accent: string | null; sort_order: number; is_active: boolean; }
+interface WhyRow { id: string; kicker: string | null; title: string; description: string; stat: string | null; image_url: string; accent: string; cta_label: string | null; cta_link: string | null; sort_order: number; is_active: boolean; }
+interface PlanRow { id: string; category: string; title: string; description: string; price_cop: number; old_price_cop: number | null; badge: string | null; image_url: string; features: string[]; is_popular: boolean; is_package: boolean; sort_order: number; is_active: boolean; }
 
-function ShowcaseAdmin() {
-  const [items, setItems] = useState<ShowcaseRow[]>([]);
-  const [editing, setEditing] = useState<ShowcaseRow | null>(null);
+function WhyWebAdmin() {
+  const [items, setItems] = useState<WhyRow[]>([]);
+  const [editing, setEditing] = useState<WhyRow | null>(null);
   const [open, setOpen] = useState(false);
-  const [imgPreview, setImgPreview] = useState("");
 
   const load = async () => {
-    const { data } = await supabase.from("showcase_slides").select("*").order("sort_order", { ascending: true });
-    setItems((data ?? []) as ShowcaseRow[]);
+    const { data } = await supabase.from("why_web_slides").select("*").order("sort_order", { ascending: true });
+    setItems((data ?? []) as WhyRow[]);
   };
   useEffect(() => { load(); }, []);
 
@@ -907,60 +907,52 @@ function ShowcaseAdmin() {
     const payload = {
       kicker: String(fd.get("kicker") ?? "") || null,
       title: String(fd.get("title")),
-      subtitle: String(fd.get("subtitle") ?? "") || null,
-      image_url: String(fd.get("image_url")),
-      price_label: String(fd.get("price_label") ?? "") || null,
+      description: String(fd.get("description") ?? ""),
+      stat: String(fd.get("stat") ?? "") || null,
+      image_url: String(fd.get("image_url") ?? ""),
+      accent: String(fd.get("accent") ?? "#ff7a1a"),
       cta_label: String(fd.get("cta_label") ?? "") || null,
       cta_link: String(fd.get("cta_link") ?? "") || null,
-      accent: String(fd.get("accent") ?? "#ff7a1a") || "#ff7a1a",
       sort_order: Number(fd.get("sort_order") ?? 0),
       is_active: fd.get("is_active") === "on",
     };
     const { error } = editing
-      ? await supabase.from("showcase_slides").update(payload).eq("id", editing.id)
-      : await supabase.from("showcase_slides").insert(payload);
+      ? await supabase.from("why_web_slides").update(payload).eq("id", editing.id)
+      : await supabase.from("why_web_slides").insert(payload);
     if (error) toast.error(error.message);
-    else { toast.success("Guardado"); setOpen(false); setEditing(null); setImgPreview(""); load(); }
+    else { toast.success("Guardado"); setOpen(false); setEditing(null); load(); }
   };
 
   const remove = async (id: string) => {
     if (!confirm("¿Eliminar slide?")) return;
-    const { error } = await supabase.from("showcase_slides").delete().eq("id", id);
+    const { error } = await supabase.from("why_web_slides").delete().eq("id", id);
     if (error) toast.error(error.message); else { toast.success("Eliminado"); load(); }
   };
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-sm text-muted-foreground">Slides del bloque "Todo lo que tu negocio necesita". Edita títulos, imágenes, precios, color de acento y enlaces.</p>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setEditing(null); setImgPreview(""); } }}>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <p className="text-sm text-muted-foreground">Slides del bloque "¿Por qué tu negocio necesita una web?" en el inicio.</p>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo slide</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[85vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} slide</DialogTitle></DialogHeader>
             <form onSubmit={save} className="space-y-3">
-              <div><Label>Etiqueta superior (kicker)</Label><Input name="kicker" defaultValue={editing?.kicker ?? ""} placeholder="SERVICIOS WEB" /></div>
+              <div><Label>Etiqueta superior</Label><Input name="kicker" defaultValue={editing?.kicker ?? ""} placeholder="VISIBILIDAD 24/7" /></div>
               <div><Label>Título</Label><Input name="title" defaultValue={editing?.title} required /></div>
-              <div><Label>Subtítulo</Label><Textarea name="subtitle" defaultValue={editing?.subtitle ?? ""} rows={2} /></div>
-              <div>
-                <Label>URL de imagen</Label>
-                <Input name="image_url" defaultValue={editing?.image_url} onChange={(e) => setImgPreview(e.target.value)} required />
-                {(imgPreview || editing?.image_url) && (
-                  <img src={imgPreview || editing?.image_url} alt="preview" className="mt-2 rounded-lg border border-border max-h-40 object-cover w-full" />
-                )}
-              </div>
+              <div><Label>Descripción</Label><Textarea name="description" defaultValue={editing?.description ?? ""} rows={3} /></div>
+              <div><Label>Dato destacado</Label><Input name="stat" defaultValue={editing?.stat ?? ""} placeholder="+70% de clientes buscan en Google" /></div>
+              <div><Label>URL de imagen</Label><Input name="image_url" defaultValue={editing?.image_url ?? ""} /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>Etiqueta de precio</Label><Input name="price_label" defaultValue={editing?.price_label ?? ""} placeholder="Desde $350.000" /></div>
-                <div><Label>Color de acento</Label><Input type="color" name="accent" defaultValue={editing?.accent ?? "#ff7a1a"} className="h-10 p-1" /></div>
+                <div><Label>Texto del botón</Label><Input name="cta_label" defaultValue={editing?.cta_label ?? ""} /></div>
+                <div><Label>Enlace</Label><Input name="cta_link" defaultValue={editing?.cta_link ?? ""} placeholder="/servicios-web" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Texto del botón</Label><Input name="cta_label" defaultValue={editing?.cta_label ?? ""} placeholder="Ver más" /></div>
-                <div><Label>Enlace del botón</Label><Input name="cta_link" defaultValue={editing?.cta_link ?? ""} placeholder="/servicios-web" /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3 items-end">
+                <div><Label>Color</Label><Input type="color" name="accent" defaultValue={editing?.accent ?? "#ff7a1a"} className="h-10 p-1" /></div>
                 <div><Label>Orden</Label><Input type="number" name="sort_order" defaultValue={editing?.sort_order ?? 0} /></div>
-                <div className="flex items-center justify-between mt-6"><Label>Activo</Label><Switch name="is_active" defaultChecked={editing?.is_active ?? true} /></div>
+                <div className="flex items-center justify-between"><Label>Activo</Label><Switch name="is_active" defaultChecked={editing?.is_active ?? true} /></div>
               </div>
               <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
             </form>
@@ -970,15 +962,12 @@ function ShowcaseAdmin() {
       <div className="grid sm:grid-cols-2 gap-4">
         {items.map((s) => (
           <div key={s.id} className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="relative">
-              <img src={s.image_url} alt={s.title} className="w-full h-32 object-cover" />
-              <span className="absolute top-2 left-2 h-4 w-4 rounded-full border-2 border-white shadow" style={{ background: s.accent ?? "#ff7a1a" }} />
-            </div>
+            {s.image_url && <img src={s.image_url} alt={s.title} className="w-full h-32 object-cover" />}
             <div className="p-4">
               <div className="font-semibold">{s.title} <span className="text-xs text-muted-foreground">#{s.sort_order} {s.is_active ? "" : "· oculto"}</span></div>
-              <div className="text-xs text-muted-foreground line-clamp-2 mb-3">{s.subtitle}</div>
+              <div className="text-xs text-muted-foreground line-clamp-2 mb-3">{s.description}</div>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => { setEditing(s); setImgPreview(s.image_url); setOpen(true); }}><Edit className="h-3.5 w-3.5 mr-1" />Editar</Button>
+                <Button size="sm" variant="outline" onClick={() => { setEditing(s); setOpen(true); }}><Edit className="h-3.5 w-3.5 mr-1" />Editar</Button>
                 <Button size="sm" variant="outline" onClick={() => remove(s.id)}><Trash2 className="h-3.5 w-3.5 mr-1" />Borrar</Button>
               </div>
             </div>
@@ -989,3 +978,100 @@ function ShowcaseAdmin() {
     </>
   );
 }
+
+/* ======================= PLANES DE SERVICIOS WEB ======================= */
+function WebPlansAdmin() {
+  const [items, setItems] = useState<PlanRow[]>([]);
+  const [editing, setEditing] = useState<PlanRow | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("web_plans").select("*").order("sort_order", { ascending: true });
+    setItems((data ?? []) as PlanRow[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const old = Number(fd.get("old_price_cop") ?? 0);
+    const payload = {
+      category: String(fd.get("category") ?? "Servicios"),
+      title: String(fd.get("title")),
+      description: String(fd.get("description") ?? ""),
+      price_cop: Number(fd.get("price_cop") ?? 0),
+      old_price_cop: old > 0 ? old : null,
+      badge: String(fd.get("badge") ?? "") || null,
+      image_url: String(fd.get("image_url") ?? ""),
+      features: String(fd.get("features") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+      is_popular: fd.get("is_popular") === "on",
+      is_package: fd.get("is_package") === "on",
+      sort_order: Number(fd.get("sort_order") ?? 0),
+      is_active: fd.get("is_active") === "on",
+    };
+    const { error } = editing
+      ? await supabase.from("web_plans").update(payload).eq("id", editing.id)
+      : await supabase.from("web_plans").insert(payload);
+    if (error) toast.error(error.message);
+    else { toast.success("Guardado"); setOpen(false); setEditing(null); load(); }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("¿Eliminar plan?")) return;
+    const { error } = await supabase.from("web_plans").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Eliminado"); load(); }
+  };
+
+  return (
+    <>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <p className="text-sm text-muted-foreground">Planes y paquetes de la página "Servicios Web". Precios, categorías, insignias y características.</p>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-primary text-primary-foreground"><Plus className="h-4 w-4 mr-2" />Nuevo plan</Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>{editing ? "Editar" : "Nuevo"} plan</DialogTitle></DialogHeader>
+            <form onSubmit={save} className="space-y-3">
+              <div><Label>Categoría (agrupa los planes)</Label><Input name="category" defaultValue={editing?.category ?? "⚡ Categoría 01: Impulsa tu negocio"} required /></div>
+              <div><Label>Título</Label><Input name="title" defaultValue={editing?.title} required /></div>
+              <div><Label>Descripción</Label><Textarea name="description" defaultValue={editing?.description ?? ""} rows={3} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Precio COP</Label><Input type="number" name="price_cop" defaultValue={editing?.price_cop ?? 0} required /></div>
+                <div><Label>Precio antes (opcional)</Label><Input type="number" name="old_price_cop" defaultValue={editing?.old_price_cop ?? 0} /></div>
+              </div>
+              <div><Label>Insignia</Label><Input name="badge" defaultValue={editing?.badge ?? ""} placeholder="🔥 Más vendido" /></div>
+              <div><Label>URL de imagen</Label><Input name="image_url" defaultValue={editing?.image_url ?? ""} /></div>
+              <div><Label>Características (separadas por coma)</Label><Textarea name="features" defaultValue={editing?.features?.join(", ")} rows={2} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center justify-between"><Label>Destacado</Label><Switch name="is_popular" defaultChecked={editing?.is_popular ?? false} /></div>
+                <div className="flex items-center justify-between"><Label>Es paquete</Label><Switch name="is_package" defaultChecked={editing?.is_package ?? false} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Orden</Label><Input type="number" name="sort_order" defaultValue={editing?.sort_order ?? 0} /></div>
+                <div className="flex items-center justify-between mt-6"><Label>Activo</Label><Switch name="is_active" defaultChecked={editing?.is_active ?? true} /></div>
+              </div>
+              <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="grid gap-3">
+        {items.map((p) => (
+          <div key={p.id} className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold truncate">{p.title} {p.badge && <span className="text-xs text-primary">{p.badge}</span>}</div>
+              <div className="text-xs text-muted-foreground truncate">{p.category} · {formatCOP(p.price_cop)} · #{p.sort_order} {p.is_active ? "" : "· oculto"}</div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="icon" variant="outline" onClick={() => { setEditing(p); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
+              <Button size="icon" variant="outline" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Sin planes aún.</p>}
+      </div>
+    </>
+  );
+}
+
