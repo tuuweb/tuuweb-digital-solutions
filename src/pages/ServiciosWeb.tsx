@@ -27,19 +27,19 @@ const fallback: Plan[] = [
 ];
 
 
-function Card({ plan, packageMode = false }: { plan: Plan; packageMode?: boolean }) {
+function Card({ plan }: { plan: Plan }) {
   return (
     <motion.div
       whileHover={{ y: -6 }}
       className={`relative rounded-2xl border overflow-hidden flex flex-col bg-card transition-smooth ${
-        plan.popular ? "border-primary shadow-elegant" : "border-border shadow-card hover:border-primary/50"
+        plan.is_popular ? "border-primary shadow-elegant" : "border-border shadow-card hover:border-primary/50"
       }`}
     >
       <div className="relative h-40 overflow-hidden">
-        <img src={plan.image} alt={plan.title} loading="lazy" className="w-full h-full object-cover" />
+        <img src={plan.image_url} alt={plan.title} loading="lazy" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
         {plan.badge && (
-          <Badge className={`absolute top-3 right-3 ${plan.popular ? "bg-gradient-primary text-primary-foreground" : ""}`}>
+          <Badge className={`absolute top-3 right-3 ${plan.is_popular ? "bg-gradient-primary text-primary-foreground" : ""}`}>
             {plan.badge}
           </Badge>
         )}
@@ -48,8 +48,8 @@ function Card({ plan, packageMode = false }: { plan: Plan; packageMode?: boolean
         <h3 className="font-display text-xl font-bold">{plan.title}</h3>
         <p className="text-sm text-muted-foreground mt-1 mb-4">{plan.description}</p>
         <div className="mb-5">
-          {plan.oldPrice && <div className="text-sm text-muted-foreground line-through">{formatCOP(plan.oldPrice)}</div>}
-          <div className="text-2xl font-bold text-gradient">{packageMode ? "" : "Desde "}{formatCOP(plan.price)}</div>
+          {plan.old_price_cop ? <div className="text-sm text-muted-foreground line-through">{formatCOP(plan.old_price_cop)}</div> : null}
+          <div className="text-2xl font-bold text-gradient">{plan.is_package ? "" : "Desde "}{formatCOP(plan.price_cop)}</div>
         </div>
         <ul className="space-y-2 flex-1 mb-6">
           {plan.features.map((f) => (
@@ -59,7 +59,7 @@ function Card({ plan, packageMode = false }: { plan: Plan; packageMode?: boolean
             </li>
           ))}
         </ul>
-        <Button asChild className={plan.popular ? "bg-gradient-primary text-primary-foreground" : ""} variant={plan.popular ? "default" : "outline"}>
+        <Button asChild className={plan.is_popular ? "bg-gradient-primary text-primary-foreground" : ""} variant={plan.is_popular ? "default" : "outline"}>
           <a href={waLink(`Hola, me interesa: ${plan.title}`)} target="_blank" rel="noreferrer">
             <MessageCircle className="h-4 w-4 mr-2" />Solicitar
           </a>
@@ -69,18 +69,30 @@ function Card({ plan, packageMode = false }: { plan: Plan; packageMode?: boolean
   );
 }
 
-function CategorySection({ title, plans, packageMode = false }: { title: string; plans: Plan[]; packageMode?: boolean }) {
-  return (
-    <div className="mb-16">
-      <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">{title}</h2>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans.map((p) => <Card key={p.title} plan={p} packageMode={packageMode} />)}
-      </div>
-    </div>
-  );
-}
-
 export default function ServiciosWeb() {
+  const [plans, setPlans] = useState<Plan[]>(fallback);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    (async () => {
+      const { data } = await supabase
+        .from("web_plans")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (data && data.length) setPlans(data as Plan[]);
+    })();
+  }, []);
+
+  const groups = useMemo(() => {
+    const map = new Map<string, Plan[]>();
+    plans.forEach((p) => {
+      const key = p.category || "Servicios";
+      map.set(key, [...(map.get(key) ?? []), p]);
+    });
+    return Array.from(map.entries());
+  }, [plans]);
+
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center max-w-3xl mx-auto mb-16">
@@ -88,10 +100,15 @@ export default function ServiciosWeb() {
         <p className="mt-4 text-lg text-muted-foreground">Páginas web profesionales a precio de emprendedor. Sin mensualidades ocultas.</p>
       </div>
 
-      <CategorySection title="⚡ Categoría 01: Impulsa tu negocio" plans={cat1} />
-      <CategorySection title="🌐 Categoría 02: Presencia profesional" plans={cat2} />
-      <CategorySection title="🎉 Categoría 03: Eventos y ocasiones" plans={cat3} />
-      <CategorySection title="🎁 Paquetes — Ahorra más" plans={packages} packageMode />
+      {groups.map(([cat, list]) => (
+        <div key={cat} className="mb-16">
+          <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">{cat}</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {list.map((p) => <Card key={p.id} plan={p} />)}
+          </div>
+        </div>
+      ))}
+
 
       <div className="mt-12 rounded-3xl bg-gradient-primary p-1 shadow-elegant">
         <div className="rounded-3xl bg-card p-10 text-center">
