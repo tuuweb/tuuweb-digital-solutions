@@ -9,7 +9,7 @@ import { BrandsMarquee } from "@/components/BrandsMarquee";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeSearch } from "@/components/HomeSearch";
 import { PokerCardsCarousel, type PokerCard } from "@/components/PokerCardsCarousel";
-import { ShowcaseSlider } from "@/components/ShowcaseSlider";
+import { WhyWebSlider } from "@/components/WhyWebSlider";
 import { SupportForm } from "@/components/SupportForm";
 import { SponsorGallery } from "@/components/SponsorGallery";
 import { PromoPopup } from "@/components/PromoPopup";
