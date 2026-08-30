@@ -11,7 +11,7 @@ import { ProductQuoteDialog, type QuoteItem } from "@/components/ProductQuoteDia
 interface Product {
   id: string; name: string; description: string;
   price_cop: number; stock: number; images: string[];
-  is_active: boolean; is_coming_soon: boolean;
+  is_active: boolean; is_coming_soon: boolean; tags?: string[] | null;
 }
 
 type SortKey = "asc" | "desc" | "recent";
