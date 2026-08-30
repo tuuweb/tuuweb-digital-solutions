@@ -11,7 +11,7 @@ import { ProductQuoteDialog, type QuoteItem } from "@/components/ProductQuoteDia
 interface Product {
   id: string; name: string; description: string;
   price_cop: number; stock: number; images: string[];
-  is_active: boolean; is_coming_soon: boolean;
+  is_active: boolean; is_coming_soon: boolean; tags?: string[] | null;
 }
 
 type SortKey = "asc" | "desc" | "recent";
@@ -83,8 +83,17 @@ export function TiendaSection({ embedded = false, limit }: { embedded?: boolean;
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 onClick={() => setQuoteItem({ name: p.name, description: p.description, price_cop: p.price_cop, image: p.images?.[0] ?? techImg })}
                 className="shrink-0 w-[78%] sm:w-auto snap-center rounded-2xl border border-border bg-card overflow-hidden hover-lift cursor-pointer flex flex-col">
-                <div className="w-full h-64 bg-muted flex items-center justify-center overflow-hidden">
+                <div className="relative w-full h-64 bg-muted flex items-center justify-center overflow-hidden">
                   <img src={p.images?.[0] ?? techImg} alt={p.name} className="w-full h-full object-contain p-3" />
+                  {!!p.tags?.length && (
+                    <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[85%]">
+                      {p.tags.map((t) => (
+                        <span key={t} className="rounded-full bg-gradient-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 shadow-card">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="p-5">
                   <h3 className="font-semibold mb-1">{p.name}</h3>

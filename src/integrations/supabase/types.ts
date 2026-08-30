@@ -199,6 +199,7 @@ export type Database = {
           name: string
           price_cop: number
           stock: number
+          tags: string[]
           updated_at: string
         }
         Insert: {
@@ -211,6 +212,7 @@ export type Database = {
           name: string
           price_cop?: number
           stock?: number
+          tags?: string[]
           updated_at?: string
         }
         Update: {
@@ -223,6 +225,7 @@ export type Database = {
           name?: string
           price_cop?: number
           stock?: number
+          tags?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -572,6 +575,60 @@ export type Database = {
         }
         Relationships: []
       }
+      web_plans: {
+        Row: {
+          badge: string | null
+          category: string
+          created_at: string
+          description: string
+          features: string[]
+          id: string
+          image_url: string
+          is_active: boolean
+          is_package: boolean
+          is_popular: boolean
+          old_price_cop: number | null
+          price_cop: number
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          features?: string[]
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          is_package?: boolean
+          is_popular?: boolean
+          old_price_cop?: number | null
+          price_cop?: number
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          features?: string[]
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          is_package?: boolean
+          is_popular?: boolean
+          old_price_cop?: number | null
+          price_cop?: number
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       web_project_orders: {
         Row: {
           admin_notes: string | null
@@ -620,6 +677,54 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      why_web_slides: {
+        Row: {
+          accent: string
+          created_at: string
+          cta_label: string | null
+          cta_link: string | null
+          description: string
+          id: string
+          image_url: string
+          is_active: boolean
+          kicker: string | null
+          sort_order: number
+          stat: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          accent?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          description?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          kicker?: string | null
+          sort_order?: number
+          stat?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          accent?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          description?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          kicker?: string | null
+          sort_order?: number
+          stat?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

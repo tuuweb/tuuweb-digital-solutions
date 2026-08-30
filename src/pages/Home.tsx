@@ -9,7 +9,7 @@ import { BrandsMarquee } from "@/components/BrandsMarquee";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeSearch } from "@/components/HomeSearch";
 import { PokerCardsCarousel, type PokerCard } from "@/components/PokerCardsCarousel";
-import { ShowcaseSlider } from "@/components/ShowcaseSlider";
+import { WhyWebSlider } from "@/components/WhyWebSlider";
 import { SupportForm } from "@/components/SupportForm";
 import { SponsorGallery } from "@/components/SponsorGallery";
 import { PromoPopup } from "@/components/PromoPopup";
@@ -64,13 +64,13 @@ export default function Home() {
       {/* MARCAS / CARRUSEL EN MOVIMIENTO SUAVE */}
       <BrandsMarquee />
 
-      {/* TODO LO QUE TU NEGOCIO NECESITA - estilo cartas en la mano */}
+      {/* POR QUÉ NECESITAS UNA PÁGINA WEB */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center max-w-2xl mx-auto mb-8">
-          <h2 className="font-display text-3xl md:text-5xl font-bold">Todo lo que tu negocio necesita</h2>
-          <p className="text-muted-foreground mt-3">Descubre cada solución con un solo desliz.</p>
+          <h2 className="font-display text-3xl md:text-5xl font-bold">¿Por qué tu negocio <span className="text-gradient">necesita una web</span>?</h2>
+          <p className="text-muted-foreground mt-3">Razones reales por las que una página propia cambia tus ventas.</p>
         </div>
-        <ShowcaseSlider />
+        <WhyWebSlider />
       </section>
 
       {/* TIENDA EMBED */}
