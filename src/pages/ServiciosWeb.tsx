@@ -1,86 +1,31 @@
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatCOP } from "@/lib/supabase";
+import { formatCOP, supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { waLink } from "@/lib/contact";
 
 interface Plan {
+  id: string;
+  category: string;
   title: string;
-  price: number;
-  oldPrice?: number;
-  badge?: string;
+  price_cop: number;
+  old_price_cop: number | null;
+  badge: string | null;
   description: string;
-  image: string;
+  image_url: string;
   features: string[];
-  popular?: boolean;
+  is_popular: boolean;
+  is_package: boolean;
+  sort_order: number;
 }
 
-const cat1: Plan[] = [
-  {
-    title: "Sistema POS Web", price: 950000,
-    description: "Plataforma completa para administrar ventas, inventario y facturación electrónica DIAN desde cualquier dispositivo.",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80",
-    features: ["Dominio + Hosting 1 año", "Facturación electrónica DIAN", "Inventario completo", "Reportes avanzados"],
-  },
-  {
-    title: "Tienda Online", price: 500000, badge: "🔥 Más vendido", popular: true,
-    description: "E-commerce con panel de control sin código. Recibe pedidos por WhatsApp y empieza a vender hoy mismo.",
-    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&q=80",
-    features: ["Panel admin sin código", "Pedidos por WhatsApp", "Filtros inteligentes", "Pagos en línea opcional"],
-  },
-  {
-    title: "Menú Digital QR", price: 280000, badge: "✧ Nuevo",
-    description: "Menú interactivo con código QR para tu restaurante. Cambia precios y platos al instante.",
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80",
-    features: ["Código QR listo", "Actualización en tiempo real", "Fotos de platos", "Multi-idioma"],
-  },
+const fallback: Plan[] = [
+  { id: "f1", category: "⚡ Categoría 01: Impulsa tu negocio", title: "Sistema POS Web", price_cop: 950000, old_price_cop: null, badge: null, description: "Plataforma completa para administrar ventas, inventario y facturación electrónica DIAN.", image_url: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80", features: ["Dominio + Hosting 1 año", "Facturación DIAN", "Inventario completo"], is_popular: false, is_package: false, sort_order: 1 },
+  { id: "f2", category: "🌐 Categoría 02: Presencia profesional", title: "Landing Page", price_cop: 350000, old_price_cop: null, badge: "🔥 Más vendido", description: "Página de presentación premium para captar clientes.", image_url: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&q=80", features: ["Dominio + hosting 1 año", "100% personalizado", "Botón WhatsApp"], is_popular: true, is_package: false, sort_order: 2 },
 ];
 
-const cat2: Plan[] = [
-  {
-    title: "Landing Page", price: 350000, badge: "🔥 Más vendido", popular: true,
-    description: "Página de presentación premium para captar clientes. Diseño 100% personalizado y optimizado para móvil.",
-    image: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&q=80",
-    features: ["Dominio + hosting 1 año", "100% personalizado", "Optimizado móvil", "Botón WhatsApp"],
-  },
-  {
-    title: "Portafolio Pro", price: 420000, badge: "★ Recomendado",
-    description: "Muestra tus servicios y proyectos con una galería premium y formularios de contacto integrados.",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
-    features: ["Galería premium", "Sección servicios", "Formulario contacto", "Blog opcional"],
-  },
-];
-
-const cat3: Plan[] = [
-  {
-    title: "Invitación Digital", price: 220000, badge: "✧ Nuevo",
-    description: "Invitaciones animadas con cuenta regresiva, RSVP y mapa. Perfecta para bodas, quinces y eventos.",
-    image: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=600&q=80",
-    features: ["Entrega en 48h", "Animado", "RSVP integrado", "Cuenta regresiva"],
-  },
-];
-
-const packages: Plan[] = [
-  {
-    title: "Negocio Completo", price: 1100000, oldPrice: 1450000, badge: "★ Ahorra $300.000", popular: true,
-    description: "Todo lo que tu negocio necesita: presencia web, tienda online y sistema de ventas en un solo paquete.",
-    image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80",
-    features: ["Landing Page", "Tienda Online", "Sistema POS"],
-  },
-  {
-    title: "Kit Restaurante", price: 480000, oldPrice: 630000, badge: "Ahorra $100.000",
-    description: "Combo perfecto para restaurantes: web profesional + menú digital QR siempre actualizado.",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80",
-    features: ["Landing Page", "Menú Digital QR"],
-  },
-  {
-    title: "Marca Personal", price: 620000, oldPrice: 770000, badge: "Ahorra $80.000",
-    description: "Construye tu marca personal con landing, portafolio y SEO básico para aparecer en Google.",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80",
-    features: ["Landing Page", "Portafolio Pro", "SEO básico"],
-  },
-];
 
 function Card({ plan, packageMode = false }: { plan: Plan; packageMode?: boolean }) {
   return (
