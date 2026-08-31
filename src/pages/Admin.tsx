@@ -14,7 +14,7 @@ import { Trash2, Edit, Plus, Package, Building2, Briefcase, Sparkles, Globe, Ima
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
-interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; }
+interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; tags: string[] | null; }
 interface Rec { id: string; business_name: string; category: string; description: string; website_url: string | null; logo_url: string | null; is_coming_soon: boolean; }
 interface SoldProject {
   id: string; numero: number | null; cliente: string; dominio: string | null; tipo_pagina: string | null;
