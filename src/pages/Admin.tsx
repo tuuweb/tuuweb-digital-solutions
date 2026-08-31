@@ -53,7 +53,8 @@ export default function Admin() {
           <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Tracker proyectos</TabsTrigger>
           <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
-          <TabsTrigger value="showcase"><Sparkles className="h-4 w-4 mr-2" />Slider servicios</TabsTrigger>
+          <TabsTrigger value="why"><Sparkles className="h-4 w-4 mr-2" />Slider ¿Por qué web?</TabsTrigger>
+          <TabsTrigger value="plans"><Globe className="h-4 w-4 mr-2" />Planes web</TabsTrigger>
           <TabsTrigger value="sponsors"><Star className="h-4 w-4 mr-2" />Patrocinados</TabsTrigger>
           <TabsTrigger value="popups"><Megaphone className="h-4 w-4 mr-2" />Popups</TabsTrigger>
           <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas</TabsTrigger>
