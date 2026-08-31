@@ -589,6 +589,7 @@ function ProductsAdmin() {
       price_cop: Number(fd.get("price_cop")),
       stock: Number(fd.get("stock")),
       images: String(fd.get("images") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+      tags: String(fd.get("tags") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
       is_active: fd.get("is_active") === "on",
       is_coming_soon: fd.get("is_coming_soon") === "on",
     };
