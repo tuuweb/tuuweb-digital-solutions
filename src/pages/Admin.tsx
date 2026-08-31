@@ -10,7 +10,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download, LogOut } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, Briefcase, Sparkles, Globe, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
