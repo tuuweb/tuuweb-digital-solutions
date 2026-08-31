@@ -65,7 +65,8 @@ export default function Admin() {
         <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
-        <TabsContent value="showcase" className="mt-6"><ShowcaseAdmin /></TabsContent>
+        <TabsContent value="why" className="mt-6"><WhyWebAdmin /></TabsContent>
+        <TabsContent value="plans" className="mt-6"><WebPlansAdmin /></TabsContent>
         <TabsContent value="sponsors" className="mt-6"><SponsorsAdmin /></TabsContent>
         <TabsContent value="popups" className="mt-6"><PopupsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
