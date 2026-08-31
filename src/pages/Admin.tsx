@@ -623,6 +623,7 @@ function ProductsAdmin() {
                 <div><Label>Stock</Label><Input type="number" name="stock" defaultValue={editing?.stock ?? 0} required /></div>
               </div>
               <div><Label>Imágenes (URLs separadas por coma)</Label><Input name="images" defaultValue={editing?.images?.join(", ")} /></div>
+              <div><Label>Etiquetas (separadas por coma)</Label><Input name="tags" defaultValue={editing?.tags?.join(", ")} placeholder="Nuevo, Domicilio gratis, Oferta" /></div>
               <div className="flex items-center justify-between"><Label>Activo</Label><Switch name="is_active" defaultChecked={editing?.is_active ?? true} /></div>
               <div className="flex items-center justify-between"><Label>Próximamente</Label><Switch name="is_coming_soon" defaultChecked={editing?.is_coming_soon ?? false} /></div>
               <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
