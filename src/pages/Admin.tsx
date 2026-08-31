@@ -10,11 +10,11 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, Package, Building2, Briefcase, Sparkles, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download, LogOut } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Building2, Briefcase, Sparkles, Globe, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
-interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; }
+interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; tags: string[] | null; }
 interface Rec { id: string; business_name: string; category: string; description: string; website_url: string | null; logo_url: string | null; is_coming_soon: boolean; }
 interface SoldProject {
   id: string; numero: number | null; cliente: string; dominio: string | null; tipo_pagina: string | null;
@@ -53,7 +53,8 @@ export default function Admin() {
           <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Tracker proyectos</TabsTrigger>
           <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
-          <TabsTrigger value="showcase"><Sparkles className="h-4 w-4 mr-2" />Slider servicios</TabsTrigger>
+          <TabsTrigger value="why"><Sparkles className="h-4 w-4 mr-2" />Slider ¿Por qué web?</TabsTrigger>
+          <TabsTrigger value="plans"><Globe className="h-4 w-4 mr-2" />Planes web</TabsTrigger>
           <TabsTrigger value="sponsors"><Star className="h-4 w-4 mr-2" />Patrocinados</TabsTrigger>
           <TabsTrigger value="popups"><Megaphone className="h-4 w-4 mr-2" />Popups</TabsTrigger>
           <TabsTrigger value="brands"><Sparkles className="h-4 w-4 mr-2" />Marcas</TabsTrigger>
@@ -64,7 +65,8 @@ export default function Admin() {
         <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
         <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
-        <TabsContent value="showcase" className="mt-6"><ShowcaseAdmin /></TabsContent>
+        <TabsContent value="why" className="mt-6"><WhyWebAdmin /></TabsContent>
+        <TabsContent value="plans" className="mt-6"><WebPlansAdmin /></TabsContent>
         <TabsContent value="sponsors" className="mt-6"><SponsorsAdmin /></TabsContent>
         <TabsContent value="popups" className="mt-6"><PopupsAdmin /></TabsContent>
         <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
@@ -587,6 +589,7 @@ function ProductsAdmin() {
       price_cop: Number(fd.get("price_cop")),
       stock: Number(fd.get("stock")),
       images: String(fd.get("images") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+      tags: String(fd.get("tags") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
       is_active: fd.get("is_active") === "on",
       is_coming_soon: fd.get("is_coming_soon") === "on",
     };
@@ -620,6 +623,7 @@ function ProductsAdmin() {
                 <div><Label>Stock</Label><Input type="number" name="stock" defaultValue={editing?.stock ?? 0} required /></div>
               </div>
               <div><Label>Imágenes (URLs separadas por coma)</Label><Input name="images" defaultValue={editing?.images?.join(", ")} /></div>
+              <div><Label>Etiquetas (separadas por coma)</Label><Input name="tags" defaultValue={editing?.tags?.join(", ")} placeholder="Nuevo, Domicilio gratis, Oferta" /></div>
               <div className="flex items-center justify-between"><Label>Activo</Label><Switch name="is_active" defaultChecked={editing?.is_active ?? true} /></div>
               <div className="flex items-center justify-between"><Label>Próximamente</Label><Switch name="is_coming_soon" defaultChecked={editing?.is_coming_soon ?? false} /></div>
               <DialogFooter><Button type="submit" className="bg-gradient-primary text-primary-foreground">Guardar</Button></DialogFooter>
