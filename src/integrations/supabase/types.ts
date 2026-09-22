@@ -35,6 +35,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_crypto_keys: {
+        Row: {
+          created_at: string
+          id: string
+          secret: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          secret: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          secret?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -257,6 +275,153 @@ export type Database = {
         }
         Relationships: []
       }
+      project_credentials: {
+        Row: {
+          created_at: string
+          has_secret: boolean
+          id: string
+          kind: string
+          notes: string | null
+          project_id: string
+          provider: string
+          secret_cipher: string | null
+          updated_at: string
+          url: string | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          has_secret?: boolean
+          id?: string
+          kind?: string
+          notes?: string | null
+          project_id: string
+          provider?: string
+          secret_cipher?: string | null
+          updated_at?: string
+          url?: string | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          has_secret?: boolean
+          id?: string
+          kind?: string
+          notes?: string | null
+          project_id?: string
+          provider?: string
+          secret_cipher?: string | null
+          updated_at?: string
+          url?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_credentials_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "sold_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_renewals: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          notes: string | null
+          periodicity: string
+          price_cop: number
+          project_id: string
+          provider: string | null
+          renewal_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          periodicity?: string
+          price_cop?: number
+          project_id: string
+          provider?: string | null
+          renewal_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          periodicity?: string
+          price_cop?: number
+          project_id?: string
+          provider?: string | null
+          renewal_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_renewals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "sold_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_repos: {
+        Row: {
+          branch: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          project_id: string
+          provider: string
+          repo: string | null
+          updated_at: string
+          url: string | null
+          username: string | null
+        }
+        Insert: {
+          branch?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          project_id: string
+          provider?: string
+          repo?: string | null
+          updated_at?: string
+          url?: string | null
+          username?: string | null
+        }
+        Update: {
+          branch?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          project_id?: string
+          provider?: string
+          repo?: string | null
+          updated_at?: string
+          url?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_repos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "sold_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promo_popups: {
         Row: {
           activo: boolean
@@ -304,6 +469,87 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      provider_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      renewal_history: {
+        Row: {
+          created_at: string
+          id: string
+          new_date: string | null
+          notes: string | null
+          previous_date: string | null
+          price_cop: number
+          project_id: string
+          renewal_id: string
+          renewed_on: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          new_date?: string | null
+          notes?: string | null
+          previous_date?: string | null
+          price_cop?: number
+          project_id: string
+          renewal_id: string
+          renewed_on?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          new_date?: string | null
+          notes?: string | null
+          previous_date?: string | null
+          price_cop?: number
+          project_id?: string
+          renewal_id?: string
+          renewed_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renewal_history_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "sold_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renewal_history_renewal_id_fkey"
+            columns: ["renewal_id"]
+            isOneToOne: false
+            referencedRelation: "project_renewals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       showcase_slides: {
         Row: {
@@ -388,10 +634,12 @@ export type Database = {
           fecha_renovacion_hosting: string | null
           ia_usada: string | null
           id: string
+          nombre_proyecto: string | null
           notas: string | null
           numero: number | null
           proveedor_dominio: string | null
           proveedor_hosting: string | null
+          servicios: string[]
           telefono_hosting: string | null
           tipo_pagina: string | null
           updated_at: string
@@ -412,10 +660,12 @@ export type Database = {
           fecha_renovacion_hosting?: string | null
           ia_usada?: string | null
           id?: string
+          nombre_proyecto?: string | null
           notas?: string | null
           numero?: number | null
           proveedor_dominio?: string | null
           proveedor_hosting?: string | null
+          servicios?: string[]
           telefono_hosting?: string | null
           tipo_pagina?: string | null
           updated_at?: string
@@ -436,10 +686,12 @@ export type Database = {
           fecha_renovacion_hosting?: string | null
           ia_usada?: string | null
           id?: string
+          nombre_proyecto?: string | null
           notas?: string | null
           numero?: number | null
           proveedor_dominio?: string | null
           proveedor_hosting?: string | null
+          servicios?: string[]
           telefono_hosting?: string | null
           tipo_pagina?: string | null
           updated_at?: string
@@ -734,7 +986,25 @@ export type Database = {
     }
     Functions: {
       admin_header_password_ok: { Args: never; Returns: boolean }
+      admin_mark_renewed: {
+        Args: { _id: string; _notes?: string }
+        Returns: string
+      }
       admin_password_ok: { Args: { _password: string }; Returns: boolean }
+      admin_reveal_credential: { Args: { _id: string }; Returns: string }
+      admin_save_credential: {
+        Args: {
+          _id: string
+          _kind: string
+          _notes: string
+          _password: string
+          _project_id: string
+          _provider: string
+          _url: string
+          _username: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
