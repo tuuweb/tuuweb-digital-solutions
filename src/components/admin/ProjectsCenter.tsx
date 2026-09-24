@@ -176,15 +176,69 @@ export default function ProjectsCenter() {
     XLSX.writeFile(wb, `proyectos_tuuweb_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
+  const editDialog = (
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editing?.id ? "Editar proyecto" : "Nuevo proyecto"}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>Nombre del proyecto</Label><Input value={editing?.nombre_proyecto ?? ""} onChange={(e) => setEditing({ ...editing, nombre_proyecto: e.target.value })} placeholder="ZonaiPhone.com" /></div>
+            <div><Label>Cliente *</Label><Input value={editing?.cliente ?? ""} onChange={(e) => setEditing({ ...editing, cliente: e.target.value })} /></div>
+            <div><Label>Dominio</Label><Input value={editing?.dominio ?? ""} onChange={(e) => setEditing({ ...editing, dominio: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Tipo de página</Label><Input value={editing?.tipo_pagina ?? ""} onChange={(e) => setEditing({ ...editing, tipo_pagina: e.target.value })} /></div>
+              <div><Label>Valor (COP)</Label><Input type="number" value={editing?.cotizacion_cop ?? 0} onChange={(e) => setEditing({ ...editing, cotizacion_cop: Number(e.target.value) })} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Estado</Label>
+                <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={editing?.estado_proyecto ?? "En proceso"} onChange={(e) => setEditing({ ...editing, estado_proyecto: e.target.value })}>
+                  {["Activo", "En proceso", "Pausado", "Finalizado", "Cancelado"].map((s) => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>Estado de la página</Label>
+                <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={editing?.estado_pagina ?? "Inactiva"} onChange={(e) => setEditing({ ...editing, estado_pagina: e.target.value })}>
+                  {["Activa", "Inactiva", "En construcción"].map((s) => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <Label>Servicios contratados</Label>
+              <div className="flex flex-wrap gap-2 pt-2">
+                {options.filter((o) => o.kind === "servicio" && o.is_active).map((o) => {
+                  const on = (editing?.servicios ?? []).includes(o.name);
+                  return (
+                    <button key={o.id} type="button"
+                      onClick={() => {
+                        const cur = editing?.servicios ?? [];
+                        setEditing({ ...editing, servicios: on ? cur.filter((s) => s !== o.name) : [...cur, o.name] });
+                      }}
+                      className={`rounded-full px-3 py-1 text-xs font-medium border ${on ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}>
+                      {o.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div><Label>Notas</Label><Textarea value={editing?.notas ?? ""} onChange={(e) => setEditing({ ...editing, notas: e.target.value })} /></div>
+            <Button className="w-full" onClick={save}>Guardar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+  );
+
   if (current) {
     return (
-      <ProjectDetail
-        project={current}
-        options={options}
-        onBack={() => { setOpenId(null); load(); }}
-        onEdit={() => setEditing(current)}
-        onDelete={() => remove(current.id)}
-      />
+      <>
+        <ProjectDetail
+          project={current}
+          options={options}
+          onBack={() => { setOpenId(null); load(); }}
+          onEdit={() => setEditing(current)}
+          onDelete={() => remove(current.id)}
+        />
+        {editDialog}
+      </>
     );
   }
 
@@ -251,54 +305,7 @@ export default function ProjectsCenter() {
         {filtered.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center md:col-span-2 xl:col-span-3">Sin proyectos.</p>}
       </div>
 
-      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{editing?.id ? "Editar proyecto" : "Nuevo proyecto"}</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div><Label>Nombre del proyecto</Label><Input value={editing?.nombre_proyecto ?? ""} onChange={(e) => setEditing({ ...editing, nombre_proyecto: e.target.value })} placeholder="ZonaiPhone.com" /></div>
-            <div><Label>Cliente *</Label><Input value={editing?.cliente ?? ""} onChange={(e) => setEditing({ ...editing, cliente: e.target.value })} /></div>
-            <div><Label>Dominio</Label><Input value={editing?.dominio ?? ""} onChange={(e) => setEditing({ ...editing, dominio: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Tipo de página</Label><Input value={editing?.tipo_pagina ?? ""} onChange={(e) => setEditing({ ...editing, tipo_pagina: e.target.value })} /></div>
-              <div><Label>Valor (COP)</Label><Input type="number" value={editing?.cotizacion_cop ?? 0} onChange={(e) => setEditing({ ...editing, cotizacion_cop: Number(e.target.value) })} /></div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Estado</Label>
-                <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={editing?.estado_proyecto ?? "En proceso"} onChange={(e) => setEditing({ ...editing, estado_proyecto: e.target.value })}>
-                  {["Activo", "En proceso", "Pausado", "Finalizado", "Cancelado"].map((s) => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <Label>Estado de la página</Label>
-                <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={editing?.estado_pagina ?? "Inactiva"} onChange={(e) => setEditing({ ...editing, estado_pagina: e.target.value })}>
-                  {["Activa", "Inactiva", "En construcción"].map((s) => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-            <div>
-              <Label>Servicios contratados</Label>
-              <div className="flex flex-wrap gap-2 pt-2">
-                {options.filter((o) => o.kind === "servicio" && o.is_active).map((o) => {
-                  const on = (editing?.servicios ?? []).includes(o.name);
-                  return (
-                    <button key={o.id} type="button"
-                      onClick={() => {
-                        const cur = editing?.servicios ?? [];
-                        setEditing({ ...editing, servicios: on ? cur.filter((s) => s !== o.name) : [...cur, o.name] });
-                      }}
-                      className={`rounded-full px-3 py-1 text-xs font-medium border ${on ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}>
-                      {o.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div><Label>Notas</Label><Textarea value={editing?.notas ?? ""} onChange={(e) => setEditing({ ...editing, notas: e.target.value })} /></div>
-            <Button className="w-full" onClick={save}>Guardar</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {editDialog}
     </div>
   );
 }
