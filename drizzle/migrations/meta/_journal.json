@@ -15,6 +15,13 @@
       "when": 1790095276627,
       "tag": "0001_project_control_center",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790237708906,
+      "tag": "0002_fix_admin_password_hash",
+      "breakpoints": true
     }
   ]
 }
