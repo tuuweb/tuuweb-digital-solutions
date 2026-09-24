@@ -12,7 +12,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Trash2, Edit, Plus, Package, Building2, Briefcase, Sparkles, Globe, Image as ImageIcon, MessageSquare, Mail, Phone, Star, Megaphone, FileText, Download, LogOut } from "lucide-react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+import ProjectsCenter, { CatalogsAdmin } from "@/components/admin/ProjectsCenter";
 
 interface Product { id: string; name: string; description: string; price_cop: number; stock: number; images: string[]; is_active: boolean; is_coming_soon: boolean; tags: string[] | null; }
 interface Rec { id: string; business_name: string; category: string; description: string; website_url: string | null; logo_url: string | null; is_coming_soon: boolean; }
@@ -50,7 +50,8 @@ export default function Admin() {
 
       <Tabs defaultValue="sold">
         <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Tracker proyectos</TabsTrigger>
+          <TabsTrigger value="sold"><Briefcase className="h-4 w-4 mr-2" />Proyectos</TabsTrigger>
+          <TabsTrigger value="catalogs"><FileText className="h-4 w-4 mr-2" />Catálogos</TabsTrigger>
           <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-2" />Mensajes</TabsTrigger>
           <TabsTrigger value="hero"><ImageIcon className="h-4 w-4 mr-2" />Carrusel principal</TabsTrigger>
           <TabsTrigger value="why"><Sparkles className="h-4 w-4 mr-2" />Slider ¿Por qué web?</TabsTrigger>
@@ -62,7 +63,8 @@ export default function Admin() {
           <TabsTrigger value="directory"><Building2 className="h-4 w-4 mr-2" />Directorio</TabsTrigger>
           <TabsTrigger value="content"><FileText className="h-4 w-4 mr-2" />Textos</TabsTrigger>
         </TabsList>
-        <TabsContent value="sold" className="mt-6"><SoldProjectsAdmin /></TabsContent>
+        <TabsContent value="sold" className="mt-6"><ProjectsCenter /></TabsContent>
+        <TabsContent value="catalogs" className="mt-6"><CatalogsAdmin /></TabsContent>
         <TabsContent value="messages" className="mt-6"><SupportMessagesAdmin /></TabsContent>
         <TabsContent value="hero" className="mt-6"><HeroSlidesAdmin /></TabsContent>
         <TabsContent value="why" className="mt-6"><WhyWebAdmin /></TabsContent>
